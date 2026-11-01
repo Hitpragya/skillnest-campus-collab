@@ -7,4 +7,5 @@
 - [x] Local VS Code setup (MSYS2 UCRT64 settings and tasks)
 - [x] Requirements Board, requirement-owner interest requests, and local end-to-end verification
 - [x] PostgreSQL adapter (DATABASE_URL) alongside local SQLite; free Render blueprint
-- [ ] Deploy API — blocked: owner must create the Neon database and Render/Vercel services and set DATABASE_URL, CORS_ORIGIN and VITE_PEERNEST_API_URL in their dashboards
+- [x] Deploy API (Render free, https://peernest-api.onrender.com) and frontend (Vercel, https://peernest-six.vercel.app) with Neon Free PostgreSQL
+- [ ] Verify the live user workflow end to end — open /api/health in a browser, then test registration/login, student search, requirement posting and request accept/reject against the production deployment

@@ -31,8 +31,9 @@ function Directory() {
   const [skills, setSkills] = useState<string[]>([]);
   const [availability, setAvailability] = useState<Availability | "">("");
   const [interest, setInterest] = useState<CollaborationType | "">("");
+  const [mode, setMode] = useState<"any" | "all">("any");
 
-  const query: StudentSearchQuery = { q, skills, availability: availability || undefined, interest: interest || undefined };
+  const query: StudentSearchQuery = { q, skills, availability: availability || undefined, interest: interest || undefined, mode };
   const res = useStudentSearch(query);
   const offline = isNotConfigured(res.error);
   // Offline: show the unfiltered sample so layout can be previewed. Filtering is the C++ engine's job.
@@ -58,7 +59,14 @@ function Directory() {
             </button>
           ))}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid items-end gap-3 sm:grid-cols-3">
+          <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+            Match skills
+            <select value={mode} onChange={(e) => setMode(e.target.value as "any" | "all")} className="h-10 rounded-md border bg-card px-3 text-sm text-foreground">
+              <option value="any">Any selected skill</option>
+              <option value="all">All selected skills</option>
+            </select>
+          </label>
           <select value={availability} onChange={(e) => setAvailability(e.target.value as Availability | "")} className="h-10 rounded-md border bg-card px-3 text-sm">
             <option value="">Any availability</option>
             <option value="available">Available</option>

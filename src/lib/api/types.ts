@@ -40,6 +40,7 @@ export interface StudentSearchQuery {
   year?: number | undefined;
   availability?: Availability | undefined;
   interest?: CollaborationType | undefined;
+  mode?: "any" | "all" | undefined;
 }
 
 export interface CollaborationRequirement {

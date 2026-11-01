@@ -94,7 +94,7 @@ function Stat({ label, value, icon, sample }: { label: string; value: number | s
   return (
     <Panel>
       <div className="flex items-center justify-between text-primary [&_svg]:size-5">{icon}{sample && <SampleTag />}</div>
-      <p className="mt-4 font-display text-4xl font-semibold">{value}</p>
+      <p className="mt-4 font-display text-3xl font-semibold">{value}</p>
       <p className="text-sm text-muted-foreground">{label}</p>
     </Panel>
   );

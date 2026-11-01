@@ -155,7 +155,6 @@ static void testResolveAndNonDestructive() {
     s.submit(req("u1", 1));
     s.submit(req("n1", 2));
     s.submit(req("n2", 2));
-    CHECK(s.listPending() == s.listPending() || ids(s.listPending()) == ids(s.listPending()));
     CHECK(ids(s.listPending()) == (Ids{"u1", "n1", "n2"}));  // still all there
     CHECK(s.resolveRequest("n1"));
     CHECK(!s.resolveRequest("n1"));

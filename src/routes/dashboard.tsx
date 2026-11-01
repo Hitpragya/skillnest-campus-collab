@@ -77,7 +77,7 @@ function Dashboard() {
           <Link to="/students" className="flex items-center gap-1 text-sm font-medium text-primary">Browse all <ArrowRight className="size-4" /></Link>
         </div>
         {recs.isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-44 rounded-2xl" />)}</div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-44 rounded-lg" />)}</div>
         ) : recommendations.length === 0 ? (
           <EmptyState title="No recommendations yet">Add more skills to your profile to improve matching.</EmptyState>
         ) : (

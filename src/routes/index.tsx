@@ -64,7 +64,7 @@ function Landing() {
 
         <div className="relative animate-rise [animation-delay:150ms]">
           <div className="absolute inset-0 -z-10 rounded-[2rem] grid-dots opacity-60 md:-inset-6" />
-          <div className="rounded-3xl border bg-card p-5 shadow-elevated">
+          <div className="rounded-lg border bg-card p-5 shadow-elevated">
             <div className="mb-4 flex items-center justify-between">
               <p className="font-display text-sm font-semibold">Top matches for “C++, React”</p>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Illustration</span>
@@ -97,7 +97,7 @@ function Landing() {
           <h2 className="mt-2 max-w-xl text-3xl font-semibold">How the C++ data structures are used</h2>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {features.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="rounded-2xl border bg-card p-6 shadow-soft transition-transform hover:-translate-y-1">
+              <div key={title} className="rounded-lg border bg-card p-6 shadow-soft transition-transform ">
                 <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground"><Icon className="size-5" /></span>
                 <h3 className="mt-5 font-semibold">{title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{text}</p>
@@ -108,7 +108,7 @@ function Landing() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-20">
-        <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-ink p-10 text-ink-foreground md:flex-row md:items-center">
+        <div className="flex flex-col items-start justify-between gap-6 rounded-lg bg-ink p-10 text-ink-foreground md:flex-row md:items-center">
           <div>
             <h2 className="text-2xl font-semibold md:text-3xl">Looking for a teammate?</h2>
             <p className="mt-2 text-ink-foreground/70">Create a profile with your skills, then search the directory.</p>

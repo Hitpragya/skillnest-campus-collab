@@ -19,9 +19,9 @@ export const Route = createFileRoute("/")({
 
 const features = [
   { icon: Search, title: "Skill-indexed search", text: "Find peers by skill through a C++ hash-map skill index." },
-  { icon: Sparkles, title: "Smart recommendations", text: "Ranked in C++ by shared skills plus a small bonus for shared interests." },
+  { icon: Sparkles, title: "Skill-based recommendations", text: "Ranked in C++ by shared skills plus a small bonus for shared interests." },
   { icon: Inbox, title: "Prioritised requests", text: "Incoming requests ordered by a priority queue so urgent ones surface first." },
-  { icon: GitBranch, title: "Collaboration requirements", text: "Post what you need — skills, team size, deadline — and get matched." },
+  { icon: GitBranch, title: "Collaboration requirements", text: "Post what you need on the Requirements Board; interested students send a request to you." },
 ];
 
 const uses = ["Project partners", "Hackathon teammates", "Study partners", "Placement preparation"];
@@ -51,7 +51,7 @@ function Landing() {
             Find the peers who <span className="text-gradient">complete your team.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            PeerNest connects college students by technical skills and collaboration goals — so the right partner is a search away, not a group-chat away.
+            PeerNest helps students find project partners, hackathon teammates and study groups by searching each other's technical skills.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="hero"><Link to="/auth" search={{ mode: "register" }}>Create your profile <ArrowRight /></Link></Button>
@@ -94,7 +94,7 @@ function Landing() {
       <section className="border-t bg-card/60">
         <div className="mx-auto max-w-6xl px-5 py-20">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Features</p>
-          <h2 className="mt-2 max-w-xl text-3xl font-semibold">Built on real data structures, not guesswork.</h2>
+          <h2 className="mt-2 max-w-xl text-3xl font-semibold">How the C++ data structures are used</h2>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {features.map(({ icon: Icon, title, text }) => (
               <div key={title} className="rounded-2xl border bg-card p-6 shadow-soft transition-transform hover:-translate-y-1">
@@ -110,8 +110,8 @@ function Landing() {
       <section className="mx-auto max-w-6xl px-5 py-20">
         <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-ink p-10 text-ink-foreground md:flex-row md:items-center">
           <div>
-            <h2 className="text-2xl font-semibold md:text-3xl">Ready to find your people?</h2>
-            <p className="mt-2 text-ink-foreground/70">Set up your skill profile in under two minutes.</p>
+            <h2 className="text-2xl font-semibold md:text-3xl">Looking for a teammate?</h2>
+            <p className="mt-2 text-ink-foreground/70">Create a profile with your skills, then search the directory.</p>
           </div>
           <Button asChild size="lg" variant="hero"><Link to="/students"><Users /> Browse the directory</Link></Button>
         </div>

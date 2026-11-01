@@ -5,3 +5,4 @@
 - Engine core is limited to vector, unordered_map, queue and priority_queue (approved proposal); Trie/Graph/AI are not implemented.
 - When VITE_PEERNEST_API_URL is unset, pages show `BackendNotice` + clearly tagged samples from `src/lib/sample-data.ts`, and mutations report failure — never fake success.
 - Requirements Board shows persisted posts only; requirement-linked requests must target the saved owner and inherit stored title/type/priority so the scheduler gets the authoritative priority.
+- `vite.config.ts` is a plain TanStack Start + Nitro config (no platform wrapper) so the frontend builds anywhere; Nitro uses the `vercel` preset on Vercel and `node-server` elsewhere.

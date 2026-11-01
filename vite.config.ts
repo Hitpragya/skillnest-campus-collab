@@ -8,7 +8,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 // Vercel sets VERCEL=1 (and VERCEL_URL) during its builds; everywhere else we
 // produce a plain Node server (`node .output/server/index.mjs`).
-const isVercel = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
+const isVercel = Boolean(process.env["VERCEL"] || process.env["VERCEL_URL"]);
 
 export default defineConfig({
   plugins: [

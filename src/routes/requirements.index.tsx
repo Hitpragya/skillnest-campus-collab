@@ -49,7 +49,7 @@ function BoardContent() {
         <div className="grid gap-5 lg:grid-cols-2">{[0, 1].map((i) => <Skeleton key={i} className="h-80 rounded-2xl" />)}</div>
       ) : posts.error ? (
         <EmptyState title="Could not load requirements">
-          <p>{posts.error.message}</p>
+          <p>{posts.error instanceof Error ? posts.error.message : "The API did not respond. Please try again."}</p>
           <Button variant="outline" className="mt-4" onClick={() => void posts.refetch()}>Try again</Button>
         </EmptyState>
       ) : posts.data?.length === 0 ? (

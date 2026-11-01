@@ -130,7 +130,7 @@ function NewRequirement() {
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground">Used as the key in the C++ request priority queue.</p>
+              <p className="text-xs text-muted-foreground">High (1) is handled by the C++ priority_queue. Medium (2) and Low (3) share the FIFO queue in arrival order.</p>
             </div>
           </Panel>
           <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>{busy ? "Posting…" : "Post requirement"}</Button>

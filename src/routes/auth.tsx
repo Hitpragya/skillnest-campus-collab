@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +9,8 @@ import { Logo } from "@/components/peernest/primitives";
 import { authApi } from "@/lib/api/endpoints";
 import { setToken } from "@/lib/api/client";
 import { isNotConfigured } from "@/lib/api/hooks";
-import type { SkillLevel } from "@/lib/api/types";
+import { collabLabels } from "@/components/peernest/primitives";
+import type { Availability, CollaborationType, SkillLevel } from "@/lib/api/types";
 
 type Mode = "login" | "register";
 
@@ -34,6 +36,7 @@ function AuthPage() {
   const mode: Mode = search.mode ?? "login";
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const queryClient = useQueryClient();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -56,8 +59,11 @@ function AuthPage() {
                 .map((s) => s.trim())
                 .filter(Boolean)
                 .map((name) => ({ name, level: "intermediate" as SkillLevel })),
+              interests: f.getAll("interests").map(String) as CollaborationType[],
+              availability: (String(f.get("availability") || "available")) as Availability,
             });
       setToken(session.token);
+      queryClient.clear(); // drop any cached signed-out (401) results
       toast.success(mode === "login" ? "Welcome back!" : "Account created");
       navigate({ to: "/dashboard" });
     } catch (err) {
@@ -98,13 +104,32 @@ function AuthPage() {
                 <Field label="Full name" name="name" placeholder="Aarav Mehta" />
                 <div className="grid grid-cols-[1fr_100px] gap-3">
                   <Field label="Department" name="department" placeholder="Computer Science" />
-                  <Field label="Year" name="year" type="number" min={1} max={5} placeholder="3" />
+                  <Field label="Year" name="year" type="number" min={1} max={6} placeholder="3" />
                 </div>
                 <Field label="Skills (comma separated)" name="skills" placeholder="C++, React, SQL" />
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium">Open to (optional)</legend>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(Object.keys(collabLabels) as CollaborationType[]).map((k) => (
+                      <label key={k} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
+                        <input type="checkbox" name="interests" value={k} className="accent-primary" />
+                        {collabLabels[k]}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="space-y-1.5">
+                  <Label htmlFor="availability">Availability</Label>
+                  <select id="availability" name="availability" defaultValue="available" className="h-11 w-full rounded-md border bg-card px-3 text-sm">
+                    <option value="available">Available</option>
+                    <option value="limited">Limited</option>
+                    <option value="busy">Busy</option>
+                  </select>
+                </div>
               </>
             )}
             <Field label="College email" name="email" type="email" placeholder="you@college.edu" />
-            <Field label="Password" name="password" type="password" minLength={6} placeholder="••••••••" />
+            <Field label="Password" name="password" type="password" minLength={8} placeholder="••••••••" />
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>
               {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
             </Button>

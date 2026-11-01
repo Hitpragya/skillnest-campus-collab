@@ -42,13 +42,13 @@ function Directory() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Directory" title="Find students by skill" description="Queries are resolved by the C++ skill index — trie for prefix search, hash map for exact skill lookup." />
+      <PageHeader eyebrow="Directory" title="Find students by skill" description="Skills are looked up in the C++ hash-map skill index; name, availability and interest filters scan the student vector." />
       {offline && <BackendNotice what="search results" />}
 
       <div className="mb-6 space-y-4 rounded-2xl border bg-card p-4 shadow-soft">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or skill prefix, e.g. “rea”" className="h-11 pl-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or skill text, e.g. “rea”" className="h-11 pl-9" />
         </div>
         <div className="flex flex-wrap gap-2">
           {popularSkills.map((s) => (

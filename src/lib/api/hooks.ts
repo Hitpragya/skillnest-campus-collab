@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { collaborationsApi, studentsApi } from "./endpoints";
-import { ApiNotConfiguredError } from "./client";
+import { authApi, collaborationsApi, healthApi, studentsApi } from "./endpoints";
+import { ApiError, ApiNotConfiguredError, isApiConfigured, isUnauthorized } from "./client";
 import type { RequestStatus, StudentSearchQuery } from "./types";
 
-const retry = (n: number, e: unknown) => !(e instanceof ApiNotConfiguredError) && n < 2;
+// Never retry when the backend is unconfigured or the session is invalid.
+const retry = (n: number, e: unknown) => !(e instanceof ApiNotConfiguredError) && !isUnauthorized(e) && n < 2;
 
 export const isNotConfigured = (e: unknown) => e instanceof ApiNotConfiguredError;
 
@@ -18,3 +19,26 @@ export const useRecommendations = () =>
 
 export const useRequests = (status?: RequestStatus) =>
   useQuery({ queryKey: ["requests", status], queryFn: () => collaborationsApi.listRequests(status), retry });
+
+export const useCurrentStudent = () =>
+  useQuery({ queryKey: ["me"], queryFn: authApi.me, retry, staleTime: 60_000 });
+
+export type BackendState = "unconfigured" | "checking" | "unreachable" | "engine-down" | "healthy";
+
+/** Polls GET /health every 30s. Status is never inferred from the env variable alone. */
+export function useBackendHealth(): BackendState {
+  const configured = isApiConfigured();
+  const q = useQuery({
+    queryKey: ["health"],
+    queryFn: healthApi.check,
+    enabled: configured,
+    retry: false,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
+  if (!configured) return "unconfigured";
+  if (q.isPending) return "checking";
+  if (q.data) return q.data.engine === "ok" ? "healthy" : "engine-down";
+  if (q.error instanceof ApiError && q.error.status === 503) return "engine-down";
+  return "unreachable";
+}

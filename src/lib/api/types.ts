@@ -88,6 +88,15 @@ export interface RegistrationPayload extends AuthCredentials {
   department: string;
   year: number;
   skills: Skill[];
+  interests?: CollaborationType[] | undefined;
+  availability?: Availability | undefined;
+  bio?: string | undefined;
+  hoursPerWeek?: number | undefined;
+}
+
+export interface HealthStatus {
+  api: "ok";
+  engine: "ok" | "unavailable";
 }
 
 export interface AuthSession {

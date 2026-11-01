@@ -18,8 +18,8 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: Search, title: "Skill-indexed search", text: "Find peers by exact or prefix skill match, backed by a trie and hash index." },
-  { icon: Sparkles, title: "Smart recommendations", text: "Ranked matches from a weighted skill graph computed in C++." },
+  { icon: Search, title: "Skill-indexed search", text: "Find peers by skill through a C++ hash-map skill index." },
+  { icon: Sparkles, title: "Smart recommendations", text: "Ranked in C++ by shared skills plus a small bonus for shared interests." },
   { icon: Inbox, title: "Prioritised requests", text: "Incoming requests ordered by a priority queue so urgent ones surface first." },
   { icon: GitBranch, title: "Collaboration requirements", text: "Post what you need — skills, team size, deadline — and get matched." },
 ];
@@ -70,9 +70,9 @@ function Landing() {
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Illustration</span>
             </div>
             {[
-              { n: "Aarav Mehta", d: "CSE · Year 3", s: [{ name: "C++", level: "advanced" as const }, { name: "Node.js", level: "intermediate" as const }], m: 92 },
-              { n: "Diya Sharma", d: "IT · Year 2", s: [{ name: "React", level: "advanced" as const }, { name: "Figma", level: "advanced" as const }], m: 85 },
-              { n: "Kabir Rao", d: "ECE · Year 4", s: [{ name: "Python", level: "advanced" as const }, { name: "C++", level: "beginner" as const }], m: 78 },
+              { n: "Aarav Mehta", d: "CSE · Year 3", s: [{ name: "C++", level: "advanced" as const }, { name: "Node.js", level: "intermediate" as const }], m: 21 },
+              { n: "Diya Sharma", d: "IT · Year 2", s: [{ name: "React", level: "advanced" as const }, { name: "Figma", level: "advanced" as const }], m: 12 },
+              { n: "Kabir Rao", d: "ECE · Year 4", s: [{ name: "Python", level: "advanced" as const }, { name: "C++", level: "beginner" as const }], m: 11 },
             ].map((r) => (
               <div key={r.n} className="flex items-center gap-3 border-t py-3 first:border-t-0">
                 <Avatar name={r.n} />
@@ -80,7 +80,7 @@ function Landing() {
                   <p className="text-sm font-semibold">{r.n}</p>
                   <div className="mt-1 flex flex-wrap gap-1">{r.s.map((s) => <SkillBadge key={s.name} skill={s} />)}</div>
                 </div>
-                <span className="font-mono text-sm font-semibold text-primary">{r.m}%</span>
+                <span className="font-mono text-sm font-semibold text-primary">score {r.m}</span>
               </div>
             ))}
             <div className="mt-2 flex items-center justify-between rounded-xl bg-muted p-3 text-xs">

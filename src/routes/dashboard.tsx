@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Inbox, PlusCircle, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/peernest/AppShell";
-import { BackendNotice, EmptyState, PageHeader, Panel, SampleTag, StudentCard } from "@/components/peernest/primitives";
+import { AvailabilityPill, BackendNotice, EmptyState, PageHeader, Panel, SampleTag, SkillBadge, StudentCard } from "@/components/peernest/primitives";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isNotConfigured, useRecommendations, useRequests } from "@/lib/api/hooks";
+import { isNotConfigured, useCurrentStudent, useRecommendations, useRequests } from "@/lib/api/hooks";
 import { sampleRecommendations, sampleRequests } from "@/lib/sample-data";
 
 export const Route = createFileRoute("/dashboard")({
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function Dashboard() {
+  const me = useCurrentStudent();
   const recs = useRecommendations();
   const reqs = useRequests();
   const offline = isNotConfigured(recs.error);
@@ -31,7 +32,7 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Dashboard" title="Welcome to PeerNest" description="Your profile, the people the matching engine recommends, and what's waiting in your inbox."
+      <PageHeader eyebrow="Dashboard" title={me.data ? `Welcome, ${me.data.name.split(" ")[0]}` : "Welcome to PeerNest"} description="Your profile, the people the matching engine recommends, and what's waiting in your inbox."
         actions={<Button asChild variant="hero"><Link to="/collaborations/new"><PlusCircle /> New requirement</Link></Button>} />
       {offline && <BackendNotice what="profile and recommendation data" />}
 
@@ -46,8 +47,21 @@ function Dashboard() {
               Sign in once the backend is connected to see your profile here.
               <Button asChild variant="outline" size="sm" className="mt-4 w-full"><Link to="/auth">Log in</Link></Button>
             </div>
+          ) : me.isPending ? (
+            <Skeleton className="mt-4 h-24 rounded-xl" />
+          ) : me.data ? (
+            <div className="mt-4 space-y-3">
+              <div>
+                <p className="font-display text-lg font-semibold">{me.data.name}</p>
+                <p className="text-sm text-muted-foreground">{me.data.department} · Year {me.data.year}</p>
+              </div>
+              <AvailabilityPill value={me.data.availability} />
+              <div className="flex flex-wrap gap-1.5">
+                {me.data.skills.length === 0 ? <span className="text-sm text-muted-foreground">No skills added yet.</span> : me.data.skills.map((s) => <SkillBadge key={s.name} skill={s} />)}
+              </div>
+            </div>
           ) : (
-            <p className="mt-4 text-sm text-muted-foreground">Profile loads from <code className="font-mono">/auth/me</code>.</p>
+            <p className="mt-4 text-sm text-muted-foreground">Your profile could not be loaded.</p>
           )}
         </Panel>
 

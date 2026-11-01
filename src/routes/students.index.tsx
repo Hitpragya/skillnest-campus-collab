@@ -46,7 +46,7 @@ function Directory() {
       <PageHeader eyebrow="Directory" title="Find students by skill" description="Skills are looked up in the C++ hash-map skill index; name, availability and interest filters scan the student vector." />
       {offline && <BackendNotice what="search results" />}
 
-      <div className="mb-6 space-y-4 rounded-2xl border bg-card p-4 shadow-soft">
+      <div className="mb-6 space-y-4 rounded-lg border bg-card p-4 shadow-soft">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or skill text, e.g. “rea”" className="h-11 pl-9" />
@@ -84,7 +84,7 @@ function Directory() {
       </div>
 
       {res.isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-44 rounded-2xl" />)}</div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-44 rounded-lg" />)}</div>
       ) : students.length === 0 ? (
         <EmptyState title="No students match these filters">Try removing a skill or widening availability.</EmptyState>
       ) : (

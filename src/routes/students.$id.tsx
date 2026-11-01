@@ -54,7 +54,7 @@ function Profile() {
       <Link to="/students" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4" /> Directory</Link>
       {offline && <BackendNotice what="profile data" />}
       {res.isLoading ? (
-        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-lg" />
       ) : !student ? (
         <EmptyState title="Student not found" />
       ) : (

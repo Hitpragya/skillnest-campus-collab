@@ -23,7 +23,7 @@ export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?:
     <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between animate-rise">
       <div>
         {eyebrow && <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>}
-        <h1 className="text-3xl font-semibold md:text-4xl">{title}</h1>
+        <h1 className="text-2xl font-semibold md:text-3xl">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -32,12 +32,12 @@ export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?:
 }
 
 export function Panel({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("min-w-0 rounded-2xl border bg-card p-6 shadow-soft", className)}>{children}</div>;
+  return <div className={cn("min-w-0 rounded-lg border bg-card p-6 shadow-soft", className)}>{children}</div>;
 }
 
 export function BackendNotice({ what = "data" }: { what?: string }) {
   return (
-    <div className="mb-6 flex items-start gap-3 rounded-xl border border-dashed border-highlight/50 bg-highlight/5 p-4 text-sm">
+    <div className="mb-6 flex items-start gap-3 rounded-md border border-dashed border-highlight/50 bg-highlight/5 p-4 text-sm">
       <PlugZap className="mt-0.5 size-4 shrink-0 text-highlight" />
       <p>
         <span className="font-semibold">Backend not connected.</span>{" "}
@@ -92,7 +92,7 @@ export const collabLabels: Record<CollaborationType, string> = {
 export function Avatar({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
   const initials = name.split(" ").map((p) => p[0]).slice(0, 2).join("");
   return (
-    <span className={cn("grid shrink-0 place-items-center rounded-xl bg-accent font-display font-semibold text-accent-foreground", size === "lg" ? "size-20 text-2xl" : "size-11 text-sm")}>
+    <span className={cn("grid shrink-0 place-items-center rounded-md bg-accent font-display font-semibold text-accent-foreground", size === "lg" ? "size-20 text-2xl" : "size-11 text-sm")}>
       {initials}
     </span>
   );
@@ -103,7 +103,7 @@ export function StudentCard({ student, score, sample }: { student: Student; scor
     <Link
       to="/students/$id"
       params={{ id: student.id }}
-      className="group flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elevated"
+      className="group flex flex-col gap-4 rounded-lg border bg-card p-5 shadow-soft transition-colors hover:border-primary/60"
     >
       <div className="flex items-start gap-3">
         <Avatar name={student.name} />
@@ -128,7 +128,7 @@ export function StudentCard({ student, score, sample }: { student: Student; scor
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed p-10 text-center">
+    <div className="rounded-lg border border-dashed p-10 text-center">
       <p className="font-display font-semibold">{title}</p>
       {children && <div className="mt-2 text-sm text-muted-foreground">{children}</div>}
     </div>

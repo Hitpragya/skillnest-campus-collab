@@ -67,13 +67,13 @@ function Requests() {
       </div>
 
       {res.isLoading ? (
-        <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}</div>
+        <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-24 rounded-lg" />)}</div>
       ) : list.length === 0 ? (
         <EmptyState title={`No ${tab} requests`} />
       ) : (
         <div className="space-y-3">
           {list.map((r) => (
-            <div key={r.id} className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-soft animate-rise sm:flex-row sm:items-center">
+            <div key={r.id} className="flex flex-col gap-4 rounded-lg border bg-card p-5 shadow-soft animate-rise sm:flex-row sm:items-center">
               <Avatar name={r.from.name} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">

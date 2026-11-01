@@ -27,7 +27,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           to={to}
           onClick={onNavigate}
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          activeProps={{ className: "!bg-sidebar-accent !text-sidebar-accent-foreground" }}
+          activeProps={{ className: "!bg-primary/15 !text-sidebar-accent-foreground shadow-[inset_2px_0_0_var(--color-sidebar-primary)]" }}
         >
           <Icon className="size-4" />
           {label}
@@ -49,7 +49,7 @@ function ApiStatus() {
   const state = useBackendHealth();
   const c = statusCopy[state];
   return (
-    <div className="rounded-xl bg-sidebar-accent p-3 text-xs text-sidebar-foreground/80" role="status" aria-live="polite">
+    <div className="rounded-md border border-sidebar-border bg-sidebar-accent p-3 text-xs text-sidebar-foreground/80" role="status" aria-live="polite">
       <div className="flex items-center gap-2 font-semibold text-sidebar-accent-foreground">
         <span className={cn("size-2 rounded-full", c.dot)} />
         {c.title}
@@ -120,7 +120,7 @@ export function AppShell({ children, authRequired = true }: { children: ReactNod
   const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen md:flex">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between bg-sidebar p-5 md:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-sidebar-border bg-sidebar p-5 md:flex">
         <div className="space-y-8">
           <Logo className="text-sidebar-accent-foreground" />
           <NavLinks />
@@ -136,7 +136,7 @@ export function AppShell({ children, authRequired = true }: { children: ReactNod
       </header>
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-ink/50" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-ink/70" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 left-0 flex w-72 flex-col justify-between bg-sidebar p-5 animate-in slide-in-from-left">
             <div className="space-y-8">
               <div className="flex items-center justify-between">

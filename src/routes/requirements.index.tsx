@@ -46,7 +46,7 @@ function BoardContent() {
       {isNotConfigured(posts.error) ? (
         <EmptyState title="Backend not configured">Requirements will appear once the API is connected. No sample posts are shown.</EmptyState>
       ) : posts.isPending ? (
-        <div className="grid gap-5 lg:grid-cols-2">{[0, 1].map((i) => <Skeleton key={i} className="h-80 rounded-2xl" />)}</div>
+        <div className="grid gap-5 lg:grid-cols-2">{[0, 1].map((i) => <Skeleton key={i} className="h-80 rounded-lg" />)}</div>
       ) : posts.error ? (
         <EmptyState title="Could not load requirements">
           <p>{posts.error instanceof Error ? posts.error.message : "The API did not respond. Please try again."}</p>
@@ -82,7 +82,7 @@ function RequirementCard({ post, own, canRespond }: { post: RequirementPost; own
     onError: (error: Error) => toast.error(error.message),
   });
   return (
-    <article aria-label={post.title} className="flex min-w-0 flex-col gap-5 rounded-2xl border bg-card p-5 shadow-soft animate-rise sm:p-6">
+    <article aria-label={post.title} className="flex min-w-0 flex-col gap-5 rounded-lg border bg-card p-5 shadow-soft animate-rise sm:p-6">
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-semibold text-primary">{collabLabels[post.type]}</span>

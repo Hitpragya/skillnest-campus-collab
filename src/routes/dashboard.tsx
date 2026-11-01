@@ -77,7 +77,7 @@ function Dashboard() {
           <Link to="/students" className="flex items-center gap-1 text-sm font-medium text-primary">Browse all <ArrowRight className="size-4" /></Link>
         </div>
         {recs.isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-44 rounded-2xl" />)}</div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-44 rounded-lg" />)}</div>
         ) : recommendations.length === 0 ? (
           <EmptyState title="No recommendations yet">Add more skills to your profile to improve matching.</EmptyState>
         ) : (
@@ -94,7 +94,7 @@ function Stat({ label, value, icon, sample }: { label: string; value: number | s
   return (
     <Panel>
       <div className="flex items-center justify-between text-primary [&_svg]:size-5">{icon}{sample && <SampleTag />}</div>
-      <p className="mt-4 font-display text-4xl font-semibold">{value}</p>
+      <p className="mt-4 font-display text-3xl font-semibold">{value}</p>
       <p className="text-sm text-muted-foreground">{label}</p>
     </Panel>
   );

@@ -1,14 +1,3 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
-
 ## PeerNest architecture
 - Repository layout: `src/` React/TanStack Start frontend, `/server` Node/Express + SQLite API (routes under `/api`), `/engine` C++17 library and JSON-lines `peernest_worker`.
 - The C++ engine is the source of truth for search, recommendation and pending-request ordering; never reimplement these in TS or Node — the frontend reaches data only through `src/lib/api/`.

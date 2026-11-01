@@ -137,10 +137,15 @@ npm run dev
 
 ## Deployment status
 
-- The frontend can be previewed, but without a configured API URL it runs in sample-preview mode.
-- The API is **not deployed yet**. A `Dockerfile` and `render.yaml` are prepared, but there is no live API URL.
-- SQLite needs a persistent disk and exactly one server instance.
-- Remaining steps: choose a host with persistent disk, set a strong `JWT_SECRET` and `CORS_ORIGIN`, deploy, then set `VITE_PEERNEST_API_URL` to `https://<api-host>/api` for the frontend.
+- **Frontend:** Vercel build configuration is prepared (`vite.config.ts` selects Nitro's `vercel` preset on Vercel; `vercel.json` sets the `tanstack-start` framework). The frontend has **not been deployed to Vercel yet**. Without `VITE_PEERNEST_API_URL` it runs in clearly labelled sample-preview mode.
+- **Backend API:** **not deployed yet**. A `Dockerfile` and a Render blueprint (`render.yaml`, one instance with a persistent disk) are prepared; there is no live API URL.
+- **Persistence:** SQLite data only survives restarts and redeploys on that persistent disk, and the API must run as a single instance.
+- **Remaining steps:**
+  1. Connect/authorize the repository in Vercel and Render.
+  2. Deploy the API on Render with a strong `JWT_SECRET`.
+  3. Set the API's `CORS_ORIGIN` to the final Vercel domain.
+  4. Set `VITE_PEERNEST_API_URL=https://<render-api-host>/api` in Vercel and deploy the frontend.
+  5. Test the real workflow end to end (register, post a requirement, send interest, accept/reject).
 
 ## Known limitations
 

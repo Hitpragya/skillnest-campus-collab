@@ -1,0 +1,23 @@
+# Render blueprint (not deployed yet). One Docker web service with a persistent disk
+# for SQLite. Persistent disks require a paid Render instance; free instances lose data.
+services:
+  - type: web
+    name: peernest-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    numInstances: 1 # SQLite: exactly one instance
+    healthCheckPath: /api/health
+    disk:
+      name: peernest-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /data/peernest.sqlite
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false # set to your frontend URL in the Render dashboard

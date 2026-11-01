@@ -1,0 +1,11 @@
+**/node_modules
+**/.git
+engine/build
+server/data
+.env
+**/.env
+src
+public
+.lovable
+dist
+.output

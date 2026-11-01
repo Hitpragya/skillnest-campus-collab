@@ -1,4 +1,4 @@
-# PeerNest API (Node.js + Express + SQLite)
+# PeerNest API (Node.js + Express + SQLite / PostgreSQL)
 
 ```text
 Browser (React frontend)  --HTTPS + JWT-->  Express API (/api)  --SQL-->  SQLite (source of truth)
@@ -43,7 +43,7 @@ Frontend: set `VITE_PEERNEST_API_URL=http://localhost:4000/api` (note the `/api`
 
 - Direct requests without a requirement get type `project` (the DB requires a type).
 - Registration accepts optional collaboration interests and an availability value; if omitted, availability defaults to `available` and interests to an empty list.
-- Request IDs are UUIDs; the SQLite `sequence` (autoincrement) is the arrival order sent to C++.
+- Request IDs are UUIDs; the database arrival sequence (SQLite `sequence` / PostgreSQL `sequence_no`) is the arrival order sent to C++.
 - JWT (HS256) expires after 7 days. `JWT_SECRET` is mandatory (≥ 32 chars) when `NODE_ENV=production`;
   locally a clearly named development-only secret is used with a warning.
 - CORS allows only `CORS_ORIGIN` (default `http://localhost:8080,http://localhost:5173`).
@@ -74,13 +74,23 @@ shell or set `PEERNEST_ENGINE_PATH` to the built `.exe` with `C:\msys64\ucrt64\b
 `npm run dev` loads environment variables from your shell; export them or use
 `node --env-file=.env src/index.js`.
 
-## Deployment (prepared, not deployed)
+## Database modes
+
+`src/db.js` defines one async repository interface with two adapters; `app.js` only calls that interface.
+
+- **Local (default): SQLite** via `better-sqlite3`, file at `DATABASE_PATH` (default `server/data/peernest.sqlite`). The API tests run in this mode.
+- **Free online: PostgreSQL** via `pg`, used whenever `DATABASE_URL` is set (e.g. a Neon Free database; its URL includes `sslmode=require`). The schema is created idempotently on startup. Arrival order uses a `sequence_no` identity column; email uniqueness uses an index on `lower(email)`. Skills/interests stay JSON text so rows map identically.
+- The C++ worker is unchanged in both modes: Node loads rows and sends snapshots.
+- `tests/postgres-repo.test.js` checks the PostgreSQL adapter against `pg-mem`, an in-process emulator. It has **not** been run against a real Neon server.
+
+## Deployment (prepared, not deployed) — $0/month plan
 
 - `Dockerfile` (repo root) builds the engine (and runs its tests) then the API in one container.
-- `render.yaml` describes one Render web service with a 1 GB persistent disk at `/data`.
-- **SQLite needs a persistent volume and exactly one instance.** Without a disk, data is lost on redeploy.
-- Still required from you: a hosting account, setting `CORS_ORIGIN` to the frontend URL,
-  then setting `VITE_PEERNEST_API_URL=https://<your-api-host>/api` for the frontend.
+- `render.yaml` describes one **free** Render Docker web service, no persistent disk.
+- Render's free filesystem is ephemeral, so **do not use SQLite on the deployed free service**; set `DATABASE_URL` so data lives in Neon.
+- Render free services spin down after 15 minutes without traffic and take about a minute to start again. Data stays in Neon.
+- Neon Free has limited storage (0.5 GB per project at the time of writing; check Neon's current limits) and monthly compute hours, and scales its compute to zero when idle (the first query after that is slower). This is suitable for a college demo, not production-grade.
+- Still required from you, in the dashboards (never paste secrets into chat or commits): create the Neon database, set `DATABASE_URL` and `CORS_ORIGIN` in Render, then set `VITE_PEERNEST_API_URL=https://<render-api-host>/api` in Vercel.
 
 ## Limits
 

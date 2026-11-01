@@ -2,7 +2,7 @@
   "name": "peernest-server",
   "version": "0.1.0",
   "private": true,
-  "description": "PeerNest REST API: Express + SQLite, calling the C++17 engine worker over JSON lines.",
+  "description": "PeerNest REST API: Express + SQLite/PostgreSQL, calling the C++17 engine worker over JSON lines.",
   "type": "module",
   "engines": {
     "node": ">=20"

@@ -83,14 +83,13 @@ shell or set `PEERNEST_ENGINE_PATH` to the built `.exe` with `C:\msys64\ucrt64\b
 - The C++ worker is unchanged in both modes: Node loads rows and sends snapshots.
 - `tests/postgres-repo.test.js` checks the PostgreSQL adapter against `pg-mem`, an in-process emulator. It has **not** been run against a real Neon server.
 
-## Deployment (prepared, not deployed) — $0/month plan
+## Deployment (live) — $0/month on free tiers
 
-- `Dockerfile` (repo root) builds the engine (and runs its tests) then the API in one container.
-- `render.yaml` describes one **free** Render Docker web service, no persistent disk.
-- Render's free filesystem is ephemeral, so **do not use SQLite on the deployed free service**; set `DATABASE_URL` so data lives in Neon.
-- Render free services spin down after 15 minutes without traffic and take about a minute to start again. Data stays in Neon.
-- Neon Free has limited storage (0.5 GB per project at the time of writing; check Neon's current limits) and monthly compute hours, and scales its compute to zero when idle (the first query after that is slower). This is suitable for a college demo, not production-grade.
-- Still required from you, in the dashboards (never paste secrets into chat or commits): create the Neon database, set `DATABASE_URL` and `CORS_ORIGIN` in Render, then set `VITE_PEERNEST_API_URL=https://<render-api-host>/api` in Vercel.
+- The API is **deployed** on Render (free plan, Docker, Singapore region, one instance, no persistent disk, connected to the GitHub `main` branch) at <https://peernest-api.onrender.com>. The root `Dockerfile` builds the engine (and runs its tests) then the API in one container; `render.yaml` describes the free service.
+- The frontend is deployed separately on Vercel at <https://peernest-six.vercel.app>, with `VITE_PEERNEST_API_URL=https://peernest-api.onrender.com/api` and the API's `CORS_ORIGIN` allowing the Vercel aliases.
+- Data lives in a Neon Free PostgreSQL database (`DATABASE_URL`); the server's startup schema initialization created the `students`, `requirements` and `requests` tables. Render's free filesystem is ephemeral, so **SQLite is not used on the deployed service** — it remains for local development only.
+- Render free services sleep after 15 minutes without traffic and take about a minute to start again; data stays in Neon. Neon Free has limited storage and compute and scales to zero when idle; quotas can change, so check the Neon console for current limits. Suitable for a college demo, not production-grade.
+- **Validation caveat:** the PostgreSQL adapter's automated tests run against `pg-mem`, an in-process emulator — they are not real database integration tests. Boot against the actual Neon database is verified only by the Render logs (PostgreSQL mode, worker compiled, CTest 2/2, service live) and the presence of the created schema. A direct HTTP call to `/api/health` has not been independently tested from this environment, and the full user workflow (register, search, requirement, request) has not yet been verified end to end in production.
 
 ## Limits
 

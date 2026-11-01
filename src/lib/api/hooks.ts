@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { authApi, collaborationsApi, healthApi, studentsApi } from "./endpoints";
+import { authApi, collaborationsApi, healthApi, requirementsApi, studentsApi } from "./endpoints";
 import { ApiError, ApiNotConfiguredError, isApiConfigured, isUnauthorized } from "./client";
 import type { RequestStatus, StudentSearchQuery } from "./types";
 
@@ -22,6 +22,9 @@ export const useRequests = (status?: RequestStatus) =>
 
 export const useCurrentStudent = () =>
   useQuery({ queryKey: ["me"], queryFn: authApi.me, retry, staleTime: 60_000 });
+
+export const useRequirements = (mine = false) =>
+  useQuery({ queryKey: ["requirements", { mine }], queryFn: () => requirementsApi.list(mine), retry });
 
 export type BackendState = "unconfigured" | "checking" | "unreachable" | "engine-down" | "healthy";
 

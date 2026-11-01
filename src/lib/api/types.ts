@@ -55,6 +55,12 @@ export interface CollaborationRequirement {
 
 export type RequestStatus = "pending" | "accepted" | "rejected";
 
+export interface RequirementPost extends CollaborationRequirement {
+  id: string;
+  createdAt: string;
+  owner: Pick<Student, "id" | "name" | "department">;
+}
+
 export interface CollaborationRequest {
   id: string;
   from: Pick<Student, "id" | "name" | "department">;

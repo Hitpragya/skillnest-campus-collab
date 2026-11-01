@@ -62,6 +62,7 @@ const listRequestsSchema = z.object({
   status: z.enum(["pending", "accepted", "rejected"]).optional(),
   box: z.enum(["incoming", "outgoing"]).optional(),
 });
+const listRequirementsSchema = z.object({ mine: z.enum(["true", "false"]).optional() });
 
 function parse(schema, data) {
   const r = schema.safeParse(data ?? {});
@@ -103,6 +104,8 @@ function toRequirement(row) {
     teamSize: row.team_size,
     deadline: row.deadline ?? undefined,
     priority: row.priority,
+    createdAt: row.created_at,
+    owner: { id: row.owner_id, name: row.owner_name, department: row.owner_department },
   };
 }
 function toRequest(row, queue) {
@@ -159,6 +162,11 @@ export function createApp({ db, engine, config }) {
   });
   const incoming = requestsFor("to_id");
   const outgoing = requestsFor("from_id");
+  // Select only public owner fields; never join email or password data into board rows.
+  const requirementSelect = `SELECT r.*, s.name AS owner_name, s.department AS owner_department
+    FROM requirements r JOIN students s ON s.id = r.owner_id`;
+  const allRequirements = db.prepare(`${requirementSelect} ORDER BY r.created_at DESC, r.rowid DESC`);
+  const ownRequirements = db.prepare(`${requirementSelect} WHERE r.owner_id = ? ORDER BY r.created_at DESC, r.rowid DESC`);
 
   const signToken = (id) => jwt.sign({ sub: id }, config.jwtSecret, { algorithm: "HS256", expiresIn: "7d" });
 
@@ -269,6 +277,12 @@ export function createApp({ db, engine, config }) {
   });
 
   // ---- requirements ----
+  api.get("/requirements", auth, (req, res) => {
+    const { mine } = parse(listRequirementsSchema, req.query);
+    const rows = mine === "true" ? ownRequirements.all(req.me.id) : allRequirements.all();
+    res.json(rows.map(toRequirement));
+  });
+
   api.post("/requirements", auth, (req, res) => {
     const body = parse(requirementSchema, req.body);
     const row = {
@@ -284,7 +298,7 @@ export function createApp({ db, engine, config }) {
       created_at: new Date().toISOString(),
     };
     q.insertRequirement.run(row);
-    res.status(201).json(toRequirement(row));
+    res.status(201).json(toRequirement({ ...row, owner_name: req.me.name, owner_department: req.me.department }));
   });
 
   // ---- requests ----
@@ -324,7 +338,11 @@ export function createApp({ db, engine, config }) {
     let requirementId = null;
     if (body.requirementId) {
       const reqRow = q.requirementById.get(body.requirementId);
-      if (!reqRow || reqRow.owner_id !== req.me.id) throw new HttpError(404, "not_found", "Requirement not found");
+      if (!reqRow || reqRow.owner_id !== body.toStudentId) throw new HttpError(404, "not_found", "Requirement not found for this recipient");
+      // Linked requests always inherit persisted metadata; reject conflicting client priority.
+      if (body.priority !== undefined && body.priority !== reqRow.priority) {
+        throw new HttpError(400, "priority_conflict", "Priority is determined by the saved requirement");
+      }
       title = reqRow.title;
       type = reqRow.type;
       priority = reqRow.priority;

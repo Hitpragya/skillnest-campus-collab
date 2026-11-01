@@ -7,6 +7,7 @@ import type {
   HealthStatus,
   Recommendation,
   RegistrationPayload,
+  RequirementPost,
   RequestStatus,
   SendRequestPayload,
   Student,
@@ -35,6 +36,10 @@ export const studentsApi = {
   get: (id: string) => apiRequest<Student>(`/students/${encodeURIComponent(id)}`),
   /** C++ score: 10 x shared skills + 1 x shared interests. */
   recommendations: () => apiRequest<Recommendation[]>("/students/me/recommendations"),
+};
+
+export const requirementsApi = {
+  list: (mine = false) => apiRequest<RequirementPost[]>("/requirements", { query: { mine } }),
 };
 
 export const collaborationsApi = {

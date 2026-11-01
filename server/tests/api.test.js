@@ -75,6 +75,7 @@ describe("PeerNest API", () => {
 
   test("protected routes require a valid token", async () => {
     assert.equal((await request(app).get("/api/auth/me")).status, 401);
+    assert.equal((await request(app).get("/api/requirements")).status, 401);
     assert.equal((await request(app).get("/api/students").set(bearer("garbage"))).status, 401);
   });
 
@@ -115,8 +116,8 @@ describe("PeerNest API", () => {
 
   let urgentReq;
   test("create requirement", async () => {
-    const res = await request(app).post("/api/requirements").set(bearer(bala.token))
-      .send({ title: "Hackathon tomorrow", type: "hackathon", description: "Need help", requiredSkills: ["React"], teamSize: 3, priority: 1 });
+    const res = await request(app).post("/api/requirements").set(bearer(asha.token))
+      .send({ title: "Hackathon tomorrow", type: "hackathon", description: "Need help", requiredSkills: ["React"], teamSize: 3, deadline: "2026-12-01", priority: 1 });
     assert.equal(res.status, 201);
     assert.equal(res.body.priority, 1);
     urgentReq = res.body.id;
@@ -124,12 +125,48 @@ describe("PeerNest API", () => {
     assert.equal(bad.status, 400);
   });
 
+  test("requirements list exposes public owner, full fields, newest first and mine filter", async () => {
+    const newer = await request(app).post("/api/requirements").set(bearer(bala.token))
+      .send({ title: "Study group", type: "study", description: "Prepare together", requiredSkills: ["React"], teamSize: 2, priority: 2 });
+    assert.equal(newer.status, 201);
+    const res = await request(app).get("/api/requirements").set(bearer(chen.token));
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.map((r) => r.id), [newer.body.id, urgentReq]);
+    const post = res.body[1];
+    assert.deepEqual(post.owner, { id: asha.id, name: "Asha", department: "CSE" });
+    assert.equal(post.title, "Hackathon tomorrow");
+    assert.equal(post.description, "Need help");
+    assert.equal(post.type, "hackathon");
+    assert.deepEqual(post.requiredSkills, ["React"]);
+    assert.equal(post.teamSize, 3);
+    assert.equal(post.deadline, "2026-12-01");
+    assert.equal(post.priority, 1);
+    assert.ok(Number.isFinite(Date.parse(post.createdAt)));
+    assert.ok(res.body.every((r) => Object.keys(r.owner).sort().join(",") === "department,id,name"));
+    assert.ok(!JSON.stringify(res.body).includes("password_hash"));
+    const own = await request(app).get("/api/requirements?mine=true").set(bearer(asha.token));
+    assert.deepEqual(own.body.map((r) => r.id), [urgentReq]);
+    const empty = await request(app).get("/api/requirements?mine=true").set(bearer(chen.token));
+    assert.deepEqual(empty.body, []);
+    assert.equal((await request(app).get("/api/requirements?mine=invalid").set(bearer(asha.token))).status, 400);
+  });
+
+  test("linked requests reject missing requirements, wrong recipient and conflicting priority", async () => {
+    const wrong = await request(app).post("/api/requests").set(bearer(chen.token)).send({ toStudentId: bala.id, requirementId: urgentReq });
+    assert.equal(wrong.status, 404);
+    const missing = await request(app).post("/api/requests").set(bearer(chen.token)).send({ toStudentId: asha.id, requirementId: "missing" });
+    assert.equal(missing.status, 404);
+    const conflict = await request(app).post("/api/requests").set(bearer(bala.token)).send({ toStudentId: asha.id, requirementId: urgentReq, priority: 3 });
+    assert.equal(conflict.status, 400);
+    assert.equal(conflict.body.error.code, "priority_conflict");
+  });
+
   test("send requests: validation and pending order from C++ scheduler", async () => {
     const self = await request(app).post("/api/requests").set(bearer(asha.token)).send({ toStudentId: asha.id });
     assert.equal(self.status, 400);
     const ghost = await request(app).post("/api/requests").set(bearer(asha.token)).send({ toStudentId: "ghost" });
     assert.equal(ghost.status, 404);
-    const notMine = await request(app).post("/api/requests").set(bearer(chen.token)).send({ toStudentId: asha.id, requirementId: urgentReq });
+    const notMine = await request(app).post("/api/requests").set(bearer(chen.token)).send({ toStudentId: bala.id, requirementId: urgentReq });
     assert.equal(notMine.status, 404);
 
     const n1 = await request(app).post("/api/requests").set(bearer(chen.token)).send({ toStudentId: asha.id, message: "first" });
@@ -137,6 +174,11 @@ describe("PeerNest API", () => {
     assert.equal(n1.body.priority, 2);
     assert.equal(n1.body.requirementTitle, "Collaboration request");
     const u1 = await request(app).post("/api/requests").set(bearer(bala.token)).send({ toStudentId: asha.id, requirementId: urgentReq });
+    assert.equal(u1.status, 201);
+    assert.equal(u1.body.requirementId, urgentReq);
+    assert.equal(u1.body.requirementTitle, "Hackathon tomorrow");
+    assert.equal(u1.body.from.id, bala.id);
+    assert.equal(u1.body.to.id, asha.id);
     assert.equal(u1.body.priority, 1);
     assert.equal(u1.body.type, "hackathon");
     await request(app).post("/api/requests").set(bearer(chen.token)).send({ toStudentId: asha.id, priority: 3, message: "low" });
@@ -164,6 +206,11 @@ describe("PeerNest API", () => {
     const stillPending = (await request(app).get("/api/requests?status=pending").set(bearer(asha.token))).body;
     assert.equal(stillPending.length, 3);
     assert.ok(!stillPending.some((r) => r.id === target.id));
+    const rejected = await request(app).patch(`/api/requests/${stillPending[0].id}`).set(bearer(asha.token)).send({ status: "rejected" });
+    assert.equal(rejected.status, 200);
+    assert.equal(rejected.body.status, "rejected");
+    const rejectedList = await request(app).get("/api/requests?status=rejected").set(bearer(asha.token));
+    assert.deepEqual(rejectedList.body.map((r) => r.id), [stillPending[0].id]);
   });
 
   test("data and ordering survive a restart", async () => {

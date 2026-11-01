@@ -54,7 +54,7 @@ function Requests() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Inbox" title="Collaboration requests" description="Pending requests are served in order from the C++ priority queue — highest priority first." />
+      <PageHeader eyebrow="Inbox" title="Collaboration requests" description="Pending requests are ordered by the C++ scheduler: High from the priority_queue first, then Medium and Low in FIFO order." />
       {offline && <BackendNotice what="request data" />}
 
       <div className="mb-6 inline-flex rounded-xl bg-muted p-1">
@@ -79,7 +79,12 @@ function Requests() {
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-semibold">{r.from.name}</p>
                   <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold capitalize", statusStyle[r.status])}>{r.status}</span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs">P{r.priority}</span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs">P{r.priority} · {r.priority === 1 ? "High" : r.priority === 2 ? "Medium" : "Low"}</span>
+                  {r.status === "pending" && r.queue && (
+                    <span className={cn("rounded-full px-2 py-0.5 font-mono text-xs", r.queue === "urgent" ? "bg-destructive/10 text-destructive" : "bg-secondary text-secondary-foreground")}>
+                      {r.queue === "urgent" ? "priority_queue" : "FIFO queue"}
+                    </span>
+                  )}
                   {offline && <SampleTag />}
                 </div>
                 <p className="text-sm text-foreground/80">{r.requirementTitle} · <span className="text-muted-foreground">{collabLabels[r.type]}</span></p>

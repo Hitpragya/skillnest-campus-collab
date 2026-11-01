@@ -112,7 +112,7 @@ export function StudentCard({ student, score, sample }: { student: Student; scor
           <p className="text-xs text-muted-foreground">{student.department} · Year {student.year}</p>
         </div>
         {score !== undefined && (
-          <span className="rounded-lg bg-gradient-primary px-2 py-1 font-mono text-xs font-semibold text-primary-foreground">{score}%</span>
+          <span className="rounded-lg bg-gradient-primary px-2 py-1 font-mono text-xs font-semibold text-primary-foreground" title="Match score: 10 × shared skills + 1 × shared interests">score {score}</span>
         )}
       </div>
       <div className="flex flex-wrap gap-1.5">

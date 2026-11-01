@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { collaborationsApi } from "@/lib/api/endpoints";
 import { isNotConfigured, useStudent } from "@/lib/api/hooks";
 import { sampleStudents } from "@/lib/sample-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/students/$id")({
   head: () => ({
@@ -32,13 +33,15 @@ function Profile() {
   const student = offline ? sampleStudents.find((s) => s.id === id) : res.data;
   const [msg, setMsg] = useState("");
   const [sending, setSending] = useState(false);
+  const [priority, setPriority] = useState<1 | 2 | 3>(2);
 
   async function send() {
     setSending(true);
     try {
-      await collaborationsApi.sendRequest(id, msg);
+      await collaborationsApi.sendRequest(id, msg, { priority });
       toast.success("Request sent");
       setMsg("");
+      setPriority(2);
     } catch (e) {
       toast.error(isNotConfigured(e) ? "Backend not connected — the request was not sent." : (e as Error).message);
     } finally {
@@ -88,6 +91,18 @@ function Profile() {
             </Panel>
             <Panel>
               <p className="text-sm font-semibold">Send a collaboration request</p>
+              <fieldset className="mt-3">
+                <legend className="mb-2 text-xs font-medium text-muted-foreground">Priority</legend>
+                <div role="radiogroup" aria-label="Request priority" className="grid grid-cols-3 gap-2">
+                  {([1, 2, 3] as const).map((p) => (
+                    <button type="button" key={p} role="radio" aria-checked={priority === p} onClick={() => setPriority(p)}
+                      className={cn("rounded-lg border py-2 text-sm font-medium", priority === p ? "border-primary bg-primary text-primary-foreground" : "hover:border-primary/40")}>
+                      {p === 1 ? "High" : p === 2 ? "Medium" : "Low"}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">High goes to the C++ priority_queue and is served first. Medium and Low share the FIFO queue.</p>
+              </fieldset>
               <Textarea value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Hi! I'm building…" className="mt-3 min-h-28" />
               <Button onClick={send} disabled={sending || !msg.trim()} variant="hero" className="mt-3 w-full"><Send /> {sending ? "Sending…" : "Send request"}</Button>
             </Panel>

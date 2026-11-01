@@ -33,7 +33,7 @@ function Dashboard() {
   return (
     <AppShell>
       <PageHeader eyebrow="Dashboard" title={me.data ? `Welcome, ${me.data.name.split(" ")[0]}` : "Welcome to PeerNest"} description="Your profile, the people the matching engine recommends, and what's waiting in your inbox."
-        actions={<Button asChild variant="hero"><Link to="/collaborations/new"><PlusCircle /> New requirement</Link></Button>} />
+        actions={<><Button asChild variant="outline"><Link to="/requirements">Browse opportunities <ArrowRight /></Link></Button><Button asChild variant="hero"><Link to="/collaborations/new"><PlusCircle /> New requirement</Link></Button></>} />
       {offline && <BackendNotice what="profile and recommendation data" />}
 
       <div className="grid gap-5 lg:grid-cols-3">

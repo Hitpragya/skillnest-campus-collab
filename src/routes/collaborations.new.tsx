@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/peernest/AppShell";
 import { collabLabels, PageHeader, Panel } from "@/components/peernest/primitives";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/collaborations/new")({
 
 function NewRequirement() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [type, setType] = useState<CollaborationType>("project");
   const [priority, setPriority] = useState<1 | 2 | 3>(2);
   const [skills, setSkills] = useState<string[]>([]);
@@ -60,8 +62,9 @@ function NewRequirement() {
     setBusy(true);
     try {
       await collaborationsApi.createRequirement(body);
+      await queryClient.invalidateQueries({ queryKey: ["requirements"] });
       toast.success("Requirement posted");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/requirements" });
     } catch (err) {
       toast.error(isNotConfigured(err) ? "Backend not connected — the requirement was not saved." : (err as Error).message);
     } finally {

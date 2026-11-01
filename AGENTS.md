@@ -14,3 +14,4 @@
 - When the API URL (VITE_PEERNEST_API_URL) is unset, pages show `BackendNotice` + clearly tagged sample data from `src/lib/sample-data.ts`, and mutations report failure — never fake success.
 - C++17 DSA engine lives in `/engine` (CMake, no third-party deps); core is limited to vector, unordered_map, queue, priority_queue per the approved proposal — Trie/Graph are not implemented.
 - Backend lives in `/server` (Express + better-sqlite3, routes under `/api`); SQLite is the persistent source of truth, and every search/recommend/order call sends a snapshot to the C++ `peernest_worker` over JSON lines — Node must not reimplement those algorithms.
+- Requirements Board uses persisted posts only; requirement-linked requests validate the recipient against the saved owner and inherit stored metadata, so the C++ scheduler receives the authoritative priority.

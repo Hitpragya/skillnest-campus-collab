@@ -58,7 +58,7 @@ function ApiStatus() {
   );
 }
 
-function SessionAction({ onDone }: { onDone?: () => void }) {
+function SessionAction({ onDone }: { onDone?: (() => void) | undefined }) {
   const me = useCurrentStudent();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -87,7 +87,7 @@ function SessionAction({ onDone }: { onDone?: () => void }) {
   );
 }
 
-function SidebarFooter({ onDone }: { onDone?: () => void }) {
+function SidebarFooter({ onDone }: { onDone?: (() => void) | undefined }) {
   return (
     <div className="space-y-3">
       <SessionAction onDone={onDone} />

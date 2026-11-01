@@ -6,6 +6,5 @@ server/data
 **/.env
 src
 public
-.lovable
 dist
 .output

@@ -2,9 +2,11 @@
 
 ## Overview
 
-Students looking for project partners, hackathon teammates, study partners or placement-preparation groups usually rely on word of mouth or scattered chat groups. PeerNest is a university DSA project that lets students register their technical skills and interests, search for other students by skill, get skill-based recommendations, post collaboration requirements and send / accept / reject collaboration requests.
+PeerNest is our university DSA project. Students often find project partners, hackathon teammates or study groups through word of mouth and scattered chat groups. In PeerNest a student registers their skills and interests, searches other students by skill, gets recommendations based on shared skills, and sends collaboration requests with a priority.
 
-The core search, recommendation and request-ordering logic is written in C++17 using standard library data structures. The web frontend and Node.js API only collect input, store data and display results.
+Students can also post a requirement on the Requirements Board (for example "need a React developer for a hackathon"). Other students who see the post can click "I'm interested"; this sends a request to the post's owner, and the request takes the priority saved on the post. The owner then accepts or rejects it from their inbox.
+
+The search, recommendation and request-ordering logic is written in C++17 using standard library data structures. The web frontend and the Node.js API only collect input, store data in SQLite and display results.
 
 ## Implemented features
 
@@ -13,6 +15,7 @@ The core search, recommendation and request-ordering logic is written in C++17 u
 - Student directory with skill search (any / all) and metadata filters
 - Recommendations based on a deterministic scoring rule
 - Create a collaboration requirement (title, type, required skills, team size, deadline, priority)
+- Requirements Board: browse saved posts and send an "I'm interested" request to the owner
 - Send collaboration requests with a priority (High / Medium / Low); recipient can accept or reject
 - Pending requests ordered by the C++ request scheduler
 - API / engine health indicator in the app sidebar

@@ -126,6 +126,38 @@ std::vector<Student> StudentStore::searchBySkills(const std::vector<std::string>
     return result;
 }
 
+std::vector<Student> StudentStore::searchStudents(const StudentFilters& f) const {
+    std::vector<Student> candidates;
+    if (!normalizeList(f.skills).empty()) {
+        candidates = searchBySkills(f.skills, f.mode);  // hash-map lookup
+    } else {
+        candidates = students_;  // no skill filter: scan the whole vector
+    }
+    const std::string q = normalizeSkill(f.q);
+    const std::string dept = normalizeSkill(f.department);
+    const std::string avail = normalizeSkill(f.availability);
+    const std::string interest = normalizeSkill(f.interest);
+
+    std::vector<Student> result;
+    for (auto& s : candidates) {
+        if (!dept.empty() && normalizeSkill(s.department) != dept) continue;
+        if (f.year > 0 && s.year != f.year) continue;
+        if (!avail.empty() && normalizeSkill(s.availability) != avail) continue;
+        if (!interest.empty() &&
+            std::find(s.interests.begin(), s.interests.end(), interest) == s.interests.end())
+            continue;
+        if (!q.empty()) {
+            bool match = normalizeSkill(s.name).find(q) != std::string::npos;
+            for (const auto& skill : s.skills)  // skills are stored normalized
+                if (!match && skill.find(q) != std::string::npos) match = true;
+            if (!match) continue;
+        }
+        result.push_back(std::move(s));
+    }
+    std::sort(result.begin(), result.end(), byNameThenId);
+    return result;
+}
+
 std::vector<Recommendation> StudentStore::recommendStudents(const std::string& currentStudentId,
                                                             std::size_t limit) const {
     std::vector<Recommendation> out;

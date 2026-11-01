@@ -1,6 +1,6 @@
 # PeerNest C++17 DSA Engine
 
-Standalone library used later by the Node.js API. No third-party dependencies, no database, no network.
+C++17 library + JSON-lines worker used by the Node.js API in `/server`. The core library has no third-party dependencies; the worker uses the vendored single header nlohmann/json v3.11.3 (`third_party/nlohmann`, MIT), so builds need no network.
 
 > **Frontend note:** the web app's Architecture page still describes a Trie and a Weighted Graph
 > (and "graph-based" recommendations). These are **not implemented** and not part of the approved
@@ -25,7 +25,7 @@ ctest --test-dir engine/build --output-on-failure
 ./engine/build/peernest_demo.exe
 ```
 
-Targets: `peernest_core` (library), `peernest_demo` (CLI walkthrough), `peernest_tests` (registered with CTest).
+Targets: `peernest_core` (library), `peernest_demo` (CLI walkthrough), `peernest_tests`, `peernest_protocol` + `peernest_worker` (JSON-lines process for Node), `peernest_protocol_tests`. Both test executables are registered with CTest.
 Warnings: `/W4` on MSVC, `-Wall -Wextra -Wpedantic` on GCC/Clang.
 
 ## Layout
@@ -33,7 +33,9 @@ Warnings: `/W4` on MSVC, `-Wall -Wextra -Wpedantic` on GCC/Clang.
 include/peernest/  student.h, student_store.h, request.h, request_scheduler.h
 src/               student_store.cpp, request_scheduler.cpp
 cli/main.cpp       deterministic demo
-tests/test_main.cpp dependency-free tests (exit code 0 = pass)
+server/            protocol.cpp (JSON <-> classes, no DSA logic), main.cpp (stdin/stdout loop)
+third_party/       nlohmann/json.hpp
+tests/             test_main.cpp (core), test_protocol.cpp (filters + worker protocol)
 ```
 
 ## Data structures and responsibilities
@@ -61,6 +63,7 @@ tests/test_main.cpp dependency-free tests (exit code 0 = pass)
 | `submit` | O(log m) urgent, O(1) normal |
 | `resolveRequest` | O(1) (lazy), occasional O(m log m) compaction |
 | `listPending` | O(m log m) on copies |
+| `searchStudents` | skill filter via index as above, otherwise O(n) vector scan; + O(r log r) sort |
 
 ## Policies
 
@@ -73,10 +76,24 @@ tests/test_main.cpp dependency-free tests (exit code 0 = pass)
 - **Validation:** empty ids, duplicate ids (including resolved ones) and priority outside 1..3 throw `std::invalid_argument`.
 - **Lifetime:** all getters return copies; nothing points into the vector, which can reorder on removal.
 
+## Worker protocol (`peernest_worker`)
+
+One JSON object per line in, one per line out. Errors return `{"ok":false,"error":"..."}` and the process keeps running.
+
+| action | input | output `data` |
+|---|---|---|
+| `ping` | – | `"pong"` |
+| `searchStudents` | `students[]`, `filters{q,skills,mode:any\|all,department,year,availability,interest}` | `Student[]` sorted name, id |
+| `recommendStudents` | `students[]`, `studentId`, `limit` | `[{student, score, sharedSkills}]` |
+| `orderRequests` | `requests[]` in ascending persisted sequence | `[{id, priority, sequence, queue:"urgent"\|"normal"}]` |
+
+Student JSON: `{id,name,department,year,skills:[string],interests:[string],availability,hoursPerWeek}`.
+Each call builds a fresh `StudentStore` / `RequestScheduler` from the snapshot (see `/server/README.md`).
+`q` matches a case-insensitive substring of the name or of any (normalized) skill.
+
 ## Current limits
 
-- In-memory only; persistence and rebuild-on-start belong to the future Node.js API + PostgreSQL.
+- In-memory only; persistence lives in SQLite in the Node.js API, which sends snapshots per call.
 - Not thread-safe; the API must serialize calls.
-- No name/text search (`q`) or department/year filters yet.
 - One scheduler instance = one inbox; per-recipient inboxes will be a map of schedulers in the API layer.
-- Not yet connected to Node.js (N-API binding is a later milestone).
+- Worker is single-threaded; Node serialises calls.

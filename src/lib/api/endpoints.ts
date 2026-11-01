@@ -7,11 +7,13 @@ import type {
   Recommendation,
   RegistrationPayload,
   RequestStatus,
+  SendRequestPayload,
   Student,
   StudentSearchQuery,
 } from "./types";
 
-// Each function maps 1:1 to a Node.js route backed by the C++ engine.
+// Each function maps 1:1 to a route of the Node.js API in /server (mounted at /api,
+// so VITE_PEERNEST_API_URL must end with /api).
 export const authApi = {
   login: (body: AuthCredentials) =>
     apiRequest<AuthSession>("/auth/login", { method: "POST", body: JSON.stringify(body) }),
@@ -21,11 +23,11 @@ export const authApi = {
 };
 
 export const studentsApi = {
-  /** Skill index lookup (hash map + trie) in C++. */
+  /** Skill search via the C++ StudentStore (unordered_map skill index + vector scan for filters). */
   search: (query: StudentSearchQuery) =>
     apiRequest<Student[]>("/students", { query: query as Record<string, unknown> }),
   get: (id: string) => apiRequest<Student>(`/students/${encodeURIComponent(id)}`),
-  /** Graph-based matching in C++. */
+  /** C++ score: 10 x shared skills + 1 x shared interests. */
   recommendations: () => apiRequest<Recommendation[]>("/students/me/recommendations"),
 };
 
@@ -35,13 +37,13 @@ export const collaborationsApi = {
       method: "POST",
       body: JSON.stringify(body),
     }),
-  /** Ordered by the C++ priority queue. */
+  /** Pending requests ordered by the C++ scheduler: priority_queue (urgent) first, then FIFO queue. */
   listRequests: (status?: RequestStatus) =>
     apiRequest<CollaborationRequest[]>("/requests", { query: { status } }),
-  sendRequest: (toStudentId: string, message: string) =>
+  sendRequest: (toStudentId: string, message: string, extra: Omit<SendRequestPayload, "toStudentId" | "message"> = {}) =>
     apiRequest<CollaborationRequest>("/requests", {
       method: "POST",
-      body: JSON.stringify({ toStudentId, message }),
+      body: JSON.stringify({ toStudentId, message, ...extra }),
     }),
   respond: (id: string, status: Exclude<RequestStatus, "pending">) =>
     apiRequest<CollaborationRequest>(`/requests/${encodeURIComponent(id)}`, {

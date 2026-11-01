@@ -15,7 +15,8 @@ export interface Skill {
 export interface Student {
   id: string;
   name: string;
-  email: string;
+  /** Only returned for the signed-in student (/auth/*); never in directory or profile views. */
+  email?: string | undefined;
   department: string;
   year: number;
   bio?: string | undefined;
@@ -59,12 +60,22 @@ export interface CollaborationRequest {
   from: Pick<Student, "id" | "name" | "department">;
   to: Pick<Student, "id" | "name" | "department">;
   requirementTitle: string;
+  requirementId?: string | undefined;
   type: CollaborationType;
   message?: string | undefined;
   status: RequestStatus;
-  /** Priority assigned by the C++ priority queue. */
+  /** 1 = high (urgent), 2 = medium, 3 = low. */
   priority: number;
+  /** Which C++ structure ordered a pending request: priority_queue ("urgent") or FIFO queue ("normal"). */
+  queue?: "urgent" | "normal" | undefined;
   createdAt: string;
+}
+
+export interface SendRequestPayload {
+  toStudentId: string;
+  message?: string | undefined;
+  requirementId?: string | undefined;
+  priority?: 1 | 2 | 3 | undefined;
 }
 
 export interface AuthCredentials {

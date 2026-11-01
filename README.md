@@ -12,7 +12,7 @@ The search, recommendation and request-ordering logic is written in C++17 using 
 
 - Student registration and login (bcrypt-hashed passwords, JWT sessions, local sign-out)
 - Student profile: department, year, skills, interests, availability, hours per week
-- Student directory with skill search (any / all) and metadata filters
+- Student directory with skill search ("Match skills": any or all selected skills) and metadata filters
 - Recommendations based on a deterministic scoring rule
 - Create a collaboration requirement (title, type, required skills, team size, deadline, priority)
 - Requirements Board: browse saved posts and send an "I'm interested" request to the owner

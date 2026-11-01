@@ -128,7 +128,7 @@ function AuthPage() {
                 </div>
               </>
             )}
-            <Field label="College email" name="email" type="email" placeholder="you@college.edu" />
+            <Field label="Email address" name="email" type="email" placeholder="you@example.com" />
             <Field label="Password" name="password" type="password" minLength={8} placeholder="••••••••" />
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>
               {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}

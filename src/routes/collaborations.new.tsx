@@ -74,7 +74,7 @@ function NewRequirement() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Collaborate" title="Create a collaboration requirement" description="Describe who you need. The matching engine will rank students by skill overlap and availability." />
+      <PageHeader eyebrow="Collaborate" title="Create a collaboration requirement" description="Describe who you need and list the required skills. Your post appears on the Requirements Board, where other students can send you a request." />
       <form onSubmit={onSubmit} className="grid gap-5 lg:grid-cols-3">
         <Panel className="space-y-5 lg:col-span-2">
           <div className="space-y-1.5">

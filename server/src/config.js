@@ -23,6 +23,9 @@ export function loadConfig(env = process.env) {
     isProd,
     port: Number(env.PORT || 4000),
     jwtSecret,
+    // DATABASE_URL (e.g. Neon PostgreSQL) wins when set; otherwise local SQLite at DATABASE_PATH.
+    // Never log databaseUrl: it contains the password.
+    databaseUrl: env.DATABASE_URL ? env.DATABASE_URL.trim() || undefined : undefined,
     databasePath: env.DATABASE_PATH || path.join(serverRoot, "data", "peernest.sqlite"),
     corsOrigins,
     enginePath: env.PEERNEST_ENGINE_PATH || path.resolve(serverRoot, "..", "engine", "build", exe),

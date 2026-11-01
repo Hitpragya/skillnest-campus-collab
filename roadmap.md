@@ -6,4 +6,5 @@
 - [x] Health status, sign-in prompt, sign-out and request priority controls
 - [x] Local VS Code setup (MSYS2 UCRT64 settings and tasks)
 - [x] Requirements Board, requirement-owner interest requests, and local end-to-end verification
-- [ ] Deploy API — blocked: needs a hosting account with persistent disk (single instance) and a real frontend VITE_PEERNEST_API_URL
+- [x] PostgreSQL adapter (DATABASE_URL) alongside local SQLite; free Render blueprint
+- [ ] Deploy API — blocked: owner must create the Neon database and Render/Vercel services and set DATABASE_URL, CORS_ORIGIN and VITE_PEERNEST_API_URL in their dashboards

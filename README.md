@@ -6,7 +6,7 @@ PeerNest is our university DSA project. Students often find project partners, ha
 
 Students can also post a requirement on the Requirements Board (for example "need a React developer for a hackathon"). Other students who see the post can click "I'm interested"; this sends a request to the post's owner, and the request takes the priority saved on the post. The owner then accepts or rejects it from their inbox.
 
-The search, recommendation and request-ordering logic is written in C++17 using standard library data structures. The web frontend and the Node.js API only collect input, store data in SQLite and display results.
+The search, recommendation and request-ordering logic is written in C++17 using standard library data structures. The web frontend and the Node.js API only collect input, store data (SQLite locally, PostgreSQL when hosted) and display results.
 
 ## Implemented features
 
@@ -26,7 +26,7 @@ The search, recommendation and request-ordering logic is written in C++17 using 
 |---|---|
 | Frontend | React + TypeScript, TanStack Start/Router, HTML, CSS (Tailwind) |
 | API | Node.js + Express (zod validation, helmet, CORS, JWT) |
-| Persistence | SQLite (better-sqlite3) |
+| Persistence | SQLite (better-sqlite3) locally; PostgreSQL (`pg`, e.g. Neon Free) when `DATABASE_URL` is set |
 | DSA engine | C++17, built with CMake |
 | Node ↔ C++ | Long-running JSON-lines worker process (`peernest_worker`, nlohmann/json) |
 
@@ -63,14 +63,14 @@ Candidates are found through `skillIndex_`. Ties are broken by name, then ID. Th
 ## Architecture
 
 ```text
-React frontend ──HTTP──> Express API (/api) ──> SQLite (persistent source of truth)
+React frontend ──HTTP──> Express API (/api) ──> SQLite or PostgreSQL (persistent source of truth)
                                  │
                                  └─ JSON lines (stdin/stdout) ─> C++17 peernest_worker
                                        builds StudentStore / RequestScheduler
                                        from a DB snapshot, returns results
 ```
 
-For each search, recommendation or pending-request listing, the API loads current rows from SQLite and sends them to the C++ worker, which rebuilds its structures and returns the result. Restarting the server therefore loses no state. This is suitable for the small dataset of this project; it could later be optimized by keeping the structures warm.
+For each search, recommendation or pending-request listing, the API loads current rows from the database and sends them to the C++ worker, which rebuilds its structures and returns the result. Restarting the server therefore loses no state. This is suitable for the small dataset of this project; it could later be optimized by keeping the structures warm.
 
 Repository layout:
 
@@ -115,7 +115,7 @@ npm run dev            # http://localhost:4000, routes under /api
 npm test
 ```
 
-Environment variables: `PORT`, `NODE_ENV`, `JWT_SECRET`, `DATABASE_PATH` (default `server/data/peernest.sqlite`), `CORS_ORIGIN`, `PEERNEST_ENGINE_PATH`. See `server/README.md`.
+Environment variables: `PORT`, `NODE_ENV`, `JWT_SECRET`, `DATABASE_PATH` (default `server/data/peernest.sqlite`, local SQLite mode), `DATABASE_URL` (PostgreSQL; overrides SQLite when set), `CORS_ORIGIN`, `PEERNEST_ENGINE_PATH`. See `server/README.md`.
 
 ### 3. Run the frontend
 
@@ -138,18 +138,19 @@ npm run dev
 ## Deployment status
 
 - **Frontend:** Vercel build configuration is prepared (`vite.config.ts` selects Nitro's `vercel` preset on Vercel; `vercel.json` sets the `tanstack-start` framework). The frontend has **not been deployed to Vercel yet**. Without `VITE_PEERNEST_API_URL` it runs in clearly labelled sample-preview mode.
-- **Backend API:** **not deployed yet**. A `Dockerfile` and a Render blueprint (`render.yaml`, one instance with a persistent disk) are prepared; there is no live API URL.
-- **Persistence:** SQLite data only survives restarts and redeploys on that persistent disk, and the API must run as a single instance.
+- **Backend API:** **not deployed yet**. A `Dockerfile` and a Render blueprint (`render.yaml`: one **free** Docker web service, no disk) are prepared; there is no live API URL. The target cost is $0/month.
+- **Persistence:** hosted data lives in a Neon Free PostgreSQL database (`DATABASE_URL`). Render's free filesystem is ephemeral, so SQLite is for local development only. Render free services sleep after 15 minutes idle and take about a minute to wake; Neon Free has limited storage and compute hours and scales to zero when idle. Fine for a college demo, not production-grade.
+- **Not yet tested:** the PostgreSQL adapter has only been tested against an in-process emulator (`pg-mem`), not a real Neon database.
 - **Remaining steps:**
-  1. Connect/authorize the repository in Vercel and Render.
-  2. Deploy the API on Render with a strong `JWT_SECRET`.
+  1. Create a Neon Free database and connect/authorize the repository in Vercel and Render.
+  2. Deploy the API on Render (free plan); set `DATABASE_URL` in the Render dashboard (never commit it). `JWT_SECRET` is generated by the blueprint.
   3. Set the API's `CORS_ORIGIN` to the final Vercel domain.
   4. Set `VITE_PEERNEST_API_URL=https://<render-api-host>/api` in Vercel and deploy the frontend.
   5. Test the real workflow end to end (register, post a requirement, send interest, accept/reject).
 
 ## Known limitations
 
-- Single-instance SQLite persistence
+- Free hosting tiers: cold starts and limited database storage/compute
 - No password reset or rate limiting yet
 - Possible starvation of normal requests under continuous urgent traffic
 - No Trie, graph or AI components

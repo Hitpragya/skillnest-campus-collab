@@ -1,23 +1,21 @@
-# Render blueprint (not deployed yet). One Docker web service with a persistent disk
-# for SQLite. Persistent disks require a paid Render instance; free instances lose data.
+# Render blueprint (not deployed yet). $0/month setup: one FREE Docker web service, no disk.
+# Free mode stores data in an external Neon Free PostgreSQL database (DATABASE_URL).
+# There is NO persistent disk here: Render's free filesystem is ephemeral, so SQLite must not be
+# used on this service. Free services spin down after ~15 min idle and take about a minute to wake.
 services:
   - type: web
     name: peernest-api
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter
-    numInstances: 1 # SQLite: exactly one instance
+    plan: free
+    numInstances: 1
     healthCheckPath: /api/health
-    disk:
-      name: peernest-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_PATH
-        value: /data/peernest.sqlite
+      - key: DATABASE_URL
+        sync: false # paste the Neon connection string in the Render dashboard; never commit it
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        sync: false # set to your frontend URL in the Render dashboard
+        sync: false # set to your Vercel frontend URL in the Render dashboard

@@ -14,14 +14,14 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "peernest-test-"));
 const config = loadConfig({ ...process.env, NODE_ENV: "test", DATABASE_PATH: path.join(tmp, "test.sqlite"), JWT_SECRET: "test-secret" });
 let db, engine, app;
 
-function boot() {
-  db = openDatabase(config.databasePath);
+async function boot() {
+  db = await openDatabase(config);
   engine = new EngineClient(config.enginePath);
   app = createApp({ db, engine, config });
 }
-function shutdown() {
+async function shutdown() {
   engine.stop();
-  db.close();
+  await db.close();
 }
 
 async function register(name, skills, extra = {}) {
@@ -36,13 +36,13 @@ const bearer = (t) => ({ Authorization: `Bearer ${t}` });
 describe("PeerNest API", () => {
   let asha, bala, chen;
   before(async () => {
-    boot();
+    await boot();
     asha = await register("Asha", ["React", "Node"], { interests: ["hackathon"] });
     bala = await register("Bala", ["react"], { interests: ["hackathon"], availability: "busy" });
     chen = await register("Chen", ["Python"]);
   });
-  after(() => {
-    shutdown();
+  after(async () => {
+    await shutdown();
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
@@ -58,7 +58,7 @@ describe("PeerNest API", () => {
     assert.equal(dup.body.error.code, "email_taken");
     const bad = await request(app).post("/api/auth/register").send({ email: "x", password: "1" });
     assert.equal(bad.status, 400);
-    const row = db.prepare("SELECT password_hash FROM students WHERE email = ?").get("asha@college.edu");
+    const row = await db.findStudentByEmail("asha@college.edu");
     assert.match(row.password_hash, /^\$2[aby]\$/);
   });
 
@@ -215,8 +215,8 @@ describe("PeerNest API", () => {
 
   test("data and ordering survive a restart", async () => {
     const beforeRestart = (await request(app).get("/api/requests").set(bearer(asha.token))).body.map((r) => r.id);
-    shutdown();
-    boot();
+    await shutdown();
+    await boot();
     const login = await request(app).post("/api/auth/login").send({ email: "asha@college.edu", password: "password123" });
     assert.equal(login.status, 200);
     const afterRestart = (await request(app).get("/api/requests").set(bearer(login.body.token))).body.map((r) => r.id);

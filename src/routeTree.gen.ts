@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as CollaborationsNewRouteImport } from './routes/collaborations.new'
+import { Route as RequirementsIndexRouteImport } from './routes/requirements.index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 
@@ -48,6 +49,11 @@ const CollaborationsNewRoute = CollaborationsNewRouteImport.update({
   path: '/collaborations/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RequirementsIndexRoute = RequirementsIndexRouteImport.update({
+  id: '/requirements/',
+  path: '/requirements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentsIndexRoute = StudentsIndexRouteImport.update({
   id: '/students/',
   path: '/students/',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/requests': typeof RequestsRoute
   '/collaborations/new': typeof CollaborationsNewRoute
   '/students/$id': typeof StudentsIdRoute
+  '/requirements/': typeof RequirementsIndexRoute
   '/students/': typeof StudentsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/requests': typeof RequestsRoute
   '/collaborations/new': typeof CollaborationsNewRoute
   '/students/$id': typeof StudentsIdRoute
+  '/requirements': typeof RequirementsIndexRoute
   '/students': typeof StudentsIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/requests': typeof RequestsRoute
   '/collaborations/new': typeof CollaborationsNewRoute
   '/students/$id': typeof StudentsIdRoute
+  '/requirements/': typeof RequirementsIndexRoute
   '/students/': typeof StudentsIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/collaborations/new'
     | '/students/$id'
+    | '/requirements/'
     | '/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/collaborations/new'
     | '/students/$id'
+    | '/requirements'
     | '/students'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/collaborations/new'
     | '/students/$id'
+    | '/requirements/'
     | '/students/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   RequestsRoute: typeof RequestsRoute
   CollaborationsNewRoute: typeof CollaborationsNewRoute
   StudentsIdRoute: typeof StudentsIdRoute
+  RequirementsIndexRoute: typeof RequirementsIndexRoute
   StudentsIndexRoute: typeof StudentsIndexRoute
 }
 
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollaborationsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/requirements/': {
+      id: '/requirements/'
+      path: '/requirements'
+      fullPath: '/requirements/'
+      preLoaderRoute: typeof RequirementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/students/': {
       id: '/students/'
       path: '/students'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   RequestsRoute: RequestsRoute,
   CollaborationsNewRoute: CollaborationsNewRoute,
   StudentsIdRoute: StudentsIdRoute,
+  RequirementsIndexRoute: RequirementsIndexRoute,
   StudentsIndexRoute: StudentsIndexRoute,
 }
 export const routeTree = rootRouteImport

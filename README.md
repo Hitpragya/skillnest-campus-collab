@@ -1,96 +1,147 @@
-# Skillnest Campus Collab
+# PeerNest — Student Skill & Collaboration Management System Using Data Structures in C++
 
-Build a premium, modern and fully responsive web application called PeerNest.
+## Overview
 
-Project title: Student Skill and Collaboration Management System Using Data Structures in C++.
+Students looking for project partners, hackathon teammates, study partners or placement-preparation groups usually rely on word of mouth or scattered chat groups. PeerNest is a university DSA project that lets students register their technical skills and interests, search for other students by skill, get skill-based recommendations, post collaboration requirements and send / accept / reject collaboration requests.
 
-Purpose: PeerNest helps college students find other students based on technical skills and collaboration requirements, such as project partners, hackathon teammates, study partners and placement preparation.
+The core search, recommendation and request-ordering logic is written in C++17 using standard library data structures. The web frontend and Node.js API only collect input, store data and display results.
 
-Design requirements:
+## Implemented features
 
-1. Modern, professional SaaS-style interface.
+- Student registration and login (bcrypt-hashed passwords, JWT sessions, local sign-out)
+- Student profile: department, year, skills, interests, availability, hours per week
+- Student directory with skill search (any / all) and metadata filters
+- Recommendations based on a deterministic scoring rule
+- Create a collaboration requirement (title, type, required skills, team size, deadline, priority)
+- Send collaboration requests with a priority (High / Medium / Low); recipient can accept or reject
+- Pending requests ordered by the C++ request scheduler
+- API / engine health indicator in the app sidebar
 
-2. Clean dashboard with a consistent design system.
+## Technology stack
 
-3. Responsive desktop and mobile layouts.
+| Layer | Technology |
+|---|---|
+| Frontend | React + TypeScript, TanStack Start/Router, HTML, CSS (Tailwind) |
+| API | Node.js + Express (zod validation, helmet, CORS, JWT) |
+| Persistence | SQLite (better-sqlite3) |
+| DSA engine | C++17, built with CMake |
+| Node ↔ C++ | Long-running JSON-lines worker process (`peernest_worker`, nlohmann/json) |
 
-4. Professional typography, spacing, animations and cards.
+## Data structures used
 
-5. Attractive but not overly complicated design.
+All in `engine/` (C++17 standard library only for the core):
 
-Create these pages:
+| Structure | Where | Purpose |
+|---|---|---|
+| `std::vector<Student>` | `StudentStore::students_` | Owns all student records |
+| `std::unordered_map<std::string, size_t>` | `StudentStore::idIndex_` | Student ID → position in the vector (O(1) average lookup) |
+| `std::unordered_map<std::string, std::vector<std::string>>` | `StudentStore::skillIndex_` | Normalized skill (trimmed, lowercase) → student IDs |
+| `std::queue<Request>` | `RequestScheduler` | Normal requests, priority 2 (medium) and 3 (low), FIFO |
+| `std::priority_queue<Request, std::vector<Request>, Comparator>` | `RequestScheduler` | Urgent requests, priority 1 (high) |
 
-1. Landing page with project introduction, features and navigation.
+Skill searches use `skillIndex_`; the other filters (name/skill text `q`, department, year, availability, interest) scan the candidate students in the vector. Trie, graph and AI-based matching are **not** implemented.
 
-2. Student registration and login interface.
+### Recommendation score
 
-3. Student dashboard with profile information and recommended students.
+```
+score = 10 × (number of shared skills) + 1 × (number of shared interests)
+```
 
-4. Student directory with skill-based search and filters.
+Candidates are found through `skillIndex_`. Ties are broken by name, then ID. This is a simple deterministic heuristic, not machine learning or AI.
 
-5. Student profile page displaying skills and availability.
+### Request ordering policy
 
-6. Create Collaboration Requirement page.
+- Priority 1 (High) → `priority_queue` (urgent).
+- Priority 2 (Medium) and 3 (Low) → one FIFO `queue`. Low is not ordered separately from Medium.
+- Pending list order: all urgent requests first; equal urgent priority is ordered by earlier arrival (sequence number); then normal requests in FIFO order.
+- Listing copies the containers, so it does not consume the queues. Resolved requests are removed by lazy deletion.
+- Limitation: normal requests can wait indefinitely (starvation) if urgent requests keep arriving.
 
-7. Collaboration Requests page with pending, accepted and rejected requests.
+## Architecture
 
-8. DSA Architecture page explaining the actual data structures used.
+```text
+React frontend ──HTTP──> Express API (/api) ──> SQLite (persistent source of truth)
+                                 │
+                                 └─ JSON lines (stdin/stdout) ─> C++17 peernest_worker
+                                       builds StudentStore / RequestScheduler
+                                       from a DB snapshot, returns results
+```
 
-Important technical constraints:
+For each search, recommendation or pending-request listing, the API loads current rows from SQLite and sends them to the C++ worker, which rebuilds its structures and returns the result. Restarting the server therefore loses no state. This is suitable for the small dataset of this project; it could later be optimized by keeping the structures warm.
 
-- Use React, TypeScript, HTML and CSS.
+Repository layout:
 
-- Keep components modular and reusable.
+```text
+engine/   C++17 library, CLI demo, JSON-lines worker, tests (CMake)
+server/   Express API, SQLite schema, engine bridge, API tests
+src/      Frontend routes, components and typed API client (src/lib/api)
+```
 
-- Do not implement the core DSA algorithms in JavaScript or TypeScript.
+## Local setup
 
-- The actual student indexing, matching and request-priority algorithms will be implemented separately in C++ and exposed through a Node.js API.
+### Prerequisites (Windows, MSYS2 UCRT64)
 
-- Prepare clean API integration interfaces for connecting the frontend to that backend later.
+The toolchain is expected at `C:\msys64\ucrt64\bin` (GCC, CMake, Ninja, GDB). Node.js 20+ is also required.
 
-- Do not fabricate successful backend operations or present mock data as persistent data.
+In PowerShell, add the toolchain to PATH for the session:
 
-- Do not unnecessarily generate a second backend or change the architecture.
+```powershell
+$env:PATH = "C:\msys64\ucrt64\bin;$env:PATH"
+```
 
-- Keep the project easy to maintain and export to GitHub.
+In VS Code, the workspace files `.vscode/settings.json` and `.vscode/tasks.json` already do this. Use **Terminal → Run Task** with:
+`Engine: configure`, `Engine: build`, `Engine: test`, `Engine: run demo`, `Server: install`, `Server: test`, `Server: dev`.
 
-First build the complete frontend structure and visual experience. Do not attempt to claim the DSA implementation is complete.
+### 1. Build and test the C++ engine
 
-This project was built with [Lovable](https://lovable.dev).
+```bash
+cmake -S engine -B engine/build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build engine/build
+ctest --test-dir engine/build --output-on-failure
+./engine/build/peernest_demo        # Windows: engine\build\peernest_demo.exe
+```
 
-**Live app**: https://skillnest-campus-collab.lovable.app
+### 2. Run the API
 
-## Build with Lovable
+```bash
+cd server
+npm install
+npm run build:engine   # builds the C++ worker via CMake
+cp .env.example .env   # set JWT_SECRET etc.; never commit .env
+npm run dev            # http://localhost:4000, routes under /api
+npm test
+```
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/ce6851f0-d0d3-4f7c-ad30-67ad5fc47532).
+Environment variables: `PORT`, `NODE_ENV`, `JWT_SECRET`, `DATABASE_PATH` (default `server/data/peernest.sqlite`), `CORS_ORIGIN`, `PEERNEST_ENGINE_PATH`. See `server/README.md`.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+### 3. Run the frontend
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+```bash
+npm install
+cp .env.frontend.example .env.local
 npm run dev
 ```
 
-## Run locally in VS Code on Windows (MSYS2 UCRT64)
+`.env.local` contains `VITE_PEERNEST_API_URL=http://localhost:4000/api`. The value must be the API origin followed by `/api`. If it is not set, the frontend shows clearly labelled sample previews and does not pretend to save anything.
 
-Prerequisites (already at `C:\msys64\ucrt64\bin`): GCC, CMake, Ninja, GDB; plus Node.js 20+ for Windows.
-The workspace `.vscode/settings.json` prepends that folder to the integrated terminal `PATH` (workspace only, not your global settings).
+## Tests
 
-1. Open the project folder in VS Code.
-2. **Terminal → Run Task → "Engine: test (ctest)"** — configures with Ninja, builds, and runs the C++ tests.
-3. **Run Task → "Engine: run demo"** — prints skill search, recommendations and urgent-vs-normal ordering.
-4. In a terminal: `cd server; npm install` (first time only), then **Run Task → "Server: test"** and **"Server: dev"**.
-   The API listens on `http://localhost:4000/api` (`/api/health` should say `engine: ok`).
-5. Copy `.env.frontend.example` to `.env.local` in the project root, then run `npm install` and `npm run dev` for the frontend.
-   `VITE_PEERNEST_API_URL` must end in `/api`.
+| Component | Command |
+|---|---|
+| C++ engine | `ctest --test-dir engine/build --output-on-failure` |
+| API | `cd server && npm test` |
+| Frontend | `npx vitest run` |
 
-Without `VITE_PEERNEST_API_URL`, the web app shows a clearly labelled sample preview and saves nothing.
-The published Lovable site has no backend until you deploy the API and set that variable.
+## Deployment status
+
+- The frontend has a Lovable public preview. Without a configured API URL it runs in sample-preview mode.
+- The API is **not deployed yet**. A `Dockerfile` and `render.yaml` are prepared, but there is no live API URL.
+- SQLite needs a persistent disk and exactly one server instance.
+- Remaining steps: choose a host with persistent disk, set a strong `JWT_SECRET` and `CORS_ORIGIN`, deploy, then set `VITE_PEERNEST_API_URL` to `https://<api-host>/api` for the frontend.
+
+## Known limitations
+
+- Single-instance SQLite persistence
+- No password reset or rate limiting yet
+- Possible starvation of normal requests under continuous urgent traffic
+- No Trie, graph or AI components

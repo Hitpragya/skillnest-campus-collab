@@ -138,50 +138,26 @@ export function createApp({ db, engine, config }) {
   );
   app.use(express.json({ limit: "100kb" }));
 
-  // ---- prepared statements ----
-  const q = {
-    insertStudent: db.prepare(`INSERT INTO students (id,name,email,password_hash,department,year,bio,availability,hours_per_week,skills_json,interests_json,created_at)
-      VALUES (@id,@name,@email,@password_hash,@department,@year,@bio,@availability,@hours_per_week,@skills_json,@interests_json,@created_at)`),
-    studentByEmail: db.prepare("SELECT * FROM students WHERE email = ?"),
-    studentById: db.prepare("SELECT * FROM students WHERE id = ?"),
-    allStudents: db.prepare("SELECT * FROM students ORDER BY created_at, id"),
-    insertRequirement: db.prepare(`INSERT INTO requirements (id,owner_id,title,type,description,required_skills_json,team_size,deadline,priority,created_at)
-      VALUES (@id,@owner_id,@title,@type,@description,@required_skills_json,@team_size,@deadline,@priority,@created_at)`),
-    requirementById: db.prepare("SELECT * FROM requirements WHERE id = ?"),
-    insertRequest: db.prepare(`INSERT INTO requests (id,from_id,to_id,requirement_id,title,type,message,priority,status,created_at,updated_at)
-      VALUES (@id,@from_id,@to_id,@requirement_id,@title,@type,@message,@priority,'pending',@now,@now)`),
-    requestById: db.prepare("SELECT * FROM requests WHERE id = ?"),
-    updateRequestStatus: db.prepare("UPDATE requests SET status = ?, updated_at = ? WHERE id = ? AND status = 'pending'"),
-  };
-  const requestSelect = `SELECT r.*, f.name AS from_name, f.department AS from_department, t.name AS to_name, t.department AS to_department
-    FROM requests r JOIN students f ON f.id = r.from_id JOIN students t ON t.id = r.to_id`;
-  const requestWithNames = db.prepare(`${requestSelect} WHERE r.id = ?`);
-  const requestsFor = (column) => ({
-    pending: db.prepare(`${requestSelect} WHERE r.${column} = ? AND r.status = 'pending' ORDER BY r.sequence ASC`),
-    resolved: db.prepare(`${requestSelect} WHERE r.${column} = ? AND r.status = ? ORDER BY r.updated_at DESC, r.sequence DESC`),
-  });
-  const incoming = requestsFor("to_id");
-  const outgoing = requestsFor("from_id");
-  // Select only public owner fields; never join email or password data into board rows.
-  const requirementSelect = `SELECT r.*, s.name AS owner_name, s.department AS owner_department
-    FROM requirements r JOIN students s ON s.id = r.owner_id`;
-  const allRequirements = db.prepare(`${requirementSelect} ORDER BY r.created_at DESC, r.rowid DESC`);
-  const ownRequirements = db.prepare(`${requirementSelect} WHERE r.owner_id = ? ORDER BY r.created_at DESC, r.rowid DESC`);
-
+  // All storage goes through the async repository from db.js (SQLite or PostgreSQL).
   const signToken = (id) => jwt.sign({ sub: id }, config.jwtSecret, { algorithm: "HS256", expiresIn: "7d" });
 
-  function auth(req, _res, next) {
+  async function auth(req, _res, next) {
     const header = req.get("authorization") || "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : "";
     if (!token) return next(new HttpError(401, "unauthorized", "Missing bearer token"));
+    let payload;
     try {
-      const payload = jwt.verify(token, config.jwtSecret, { algorithms: ["HS256"] });
-      const row = q.studentById.get(payload.sub);
+      payload = jwt.verify(token, config.jwtSecret, { algorithms: ["HS256"] });
+    } catch {
+      return next(new HttpError(401, "unauthorized", "Invalid or expired token"));
+    }
+    try {
+      const row = await db.findStudentById(payload.sub);
       if (!row) return next(new HttpError(401, "unauthorized", "Account no longer exists"));
       req.me = row;
       next();
-    } catch {
-      next(new HttpError(401, "unauthorized", "Invalid or expired token"));
+    } catch (err) {
+      next(err); // database failure -> 500, not a misleading 401
     }
   }
 
@@ -202,7 +178,7 @@ export function createApp({ db, engine, config }) {
   // ---- auth ----
   api.post("/auth/register", wrap(async (req, res) => {
     const body = parse(registerSchema, req.body);
-    if (q.studentByEmail.get(body.email)) throw new HttpError(409, "email_taken", "An account with this email already exists");
+    if (await db.findStudentByEmail(body.email)) throw new HttpError(409, "email_taken", "An account with this email already exists");
     const row = {
       id: crypto.randomUUID(),
       name: body.name,
@@ -217,13 +193,13 @@ export function createApp({ db, engine, config }) {
       interests_json: JSON.stringify(body.interests ?? []),
       created_at: new Date().toISOString(),
     };
-    q.insertStudent.run(row);
+    await db.insertStudent(row);
     res.status(201).json({ token: signToken(row.id), student: toStudent(row, { includeEmail: true }) });
   }));
 
   api.post("/auth/login", wrap(async (req, res) => {
     const body = parse(loginSchema, req.body);
-    const row = q.studentByEmail.get(body.email);
+    const row = await db.findStudentByEmail(body.email);
     const ok = row ? await bcrypt.compare(body.password, row.password_hash) : false;
     if (!row || !ok) throw new HttpError(401, "invalid_credentials", "Email or password is incorrect");
     res.json({ token: signToken(row.id), student: toStudent(row, { includeEmail: true }) });
@@ -234,7 +210,7 @@ export function createApp({ db, engine, config }) {
   // ---- students (search and recommendations run in C++) ----
   api.get("/students", auth, wrap(async (req, res) => {
     const f = parse(searchSchema, req.query);
-    const rows = q.allStudents.all();
+    const rows = await db.listStudents();
     const byId = new Map(rows.map((r) => [r.id, r]));
     const result = await engine.call({
       action: "searchStudents",
@@ -255,7 +231,7 @@ export function createApp({ db, engine, config }) {
 
   // Must be registered before /students/:id
   api.get("/students/me/recommendations", auth, wrap(async (req, res) => {
-    const rows = q.allStudents.all();
+    const rows = await db.listStudents();
     const byId = new Map(rows.map((r) => [r.id, r]));
     const result = await engine.call({
       action: "recommendStudents",
@@ -270,20 +246,20 @@ export function createApp({ db, engine, config }) {
     );
   }));
 
-  api.get("/students/:id", auth, (req, res, next) => {
-    const row = q.studentById.get(req.params.id);
-    if (!row) return next(new HttpError(404, "not_found", "Student not found"));
+  api.get("/students/:id", auth, wrap(async (req, res) => {
+    const row = await db.findStudentById(req.params.id);
+    if (!row) throw new HttpError(404, "not_found", "Student not found");
     res.json(toStudent(row)); // no email for profile views
-  });
+  }));
 
   // ---- requirements ----
-  api.get("/requirements", auth, (req, res) => {
+  api.get("/requirements", auth, wrap(async (req, res) => {
     const { mine } = parse(listRequirementsSchema, req.query);
-    const rows = mine === "true" ? ownRequirements.all(req.me.id) : allRequirements.all();
+    const rows = await db.listRequirements(mine === "true" ? req.me.id : null);
     res.json(rows.map(toRequirement));
-  });
+  }));
 
-  api.post("/requirements", auth, (req, res) => {
+  api.post("/requirements", auth, wrap(async (req, res) => {
     const body = parse(requirementSchema, req.body);
     const row = {
       id: crypto.randomUUID(),
@@ -297,17 +273,17 @@ export function createApp({ db, engine, config }) {
       priority: body.priority,
       created_at: new Date().toISOString(),
     };
-    q.insertRequirement.run(row);
+    await db.insertRequirement(row);
     res.status(201).json(toRequirement({ ...row, owner_name: req.me.name, owner_department: req.me.department }));
-  });
+  }));
 
   // ---- requests ----
   api.get("/requests", auth, wrap(async (req, res) => {
     const { status, box } = parse(listRequestsSchema, req.query);
-    const stmts = box === "outgoing" ? outgoing : incoming;
+    const direction = box === "outgoing" ? "outgoing" : "incoming";
     const out = [];
     if (!status || status === "pending") {
-      const rows = stmts.pending.all(req.me.id); // ascending SQL sequence = arrival order
+      const rows = await db.listRequests(req.me.id, direction, "pending"); // ascending sequence = arrival order
       const byId = new Map(rows.map((r) => [r.id, r]));
       const ordered = await engine.call({
         action: "orderRequests",
@@ -323,21 +299,21 @@ export function createApp({ db, engine, config }) {
       for (const o of ordered) if (byId.has(o.id)) out.push(toRequest(byId.get(o.id), o.queue));
     }
     for (const s of ["accepted", "rejected"]) {
-      if (!status || status === s) out.push(...stmts.resolved.all(req.me.id, s).map((r) => toRequest(r)));
+      if (!status || status === s) out.push(...(await db.listRequests(req.me.id, direction, s)).map((r) => toRequest(r)));
     }
     res.json(out);
   }));
 
-  api.post("/requests", auth, (req, res) => {
+  api.post("/requests", auth, wrap(async (req, res) => {
     const body = parse(sendRequestSchema, req.body);
     if (body.toStudentId === req.me.id) throw new HttpError(400, "invalid_target", "You cannot send a request to yourself");
-    if (!q.studentById.get(body.toStudentId)) throw new HttpError(404, "not_found", "Target student not found");
+    if (!(await db.findStudentById(body.toStudentId))) throw new HttpError(404, "not_found", "Target student not found");
     let title = "Collaboration request";
     let type = "project";
     let priority = body.priority ?? 2;
     let requirementId = null;
     if (body.requirementId) {
-      const reqRow = q.requirementById.get(body.requirementId);
+      const reqRow = await db.findRequirementById(body.requirementId);
       if (!reqRow || reqRow.owner_id !== body.toStudentId) throw new HttpError(404, "not_found", "Requirement not found for this recipient");
       // Linked requests always inherit persisted metadata; reject conflicting client priority.
       if (body.priority !== undefined && body.priority !== reqRow.priority) {
@@ -349,7 +325,8 @@ export function createApp({ db, engine, config }) {
       requirementId = reqRow.id;
     }
     const id = crypto.randomUUID();
-    q.insertRequest.run({
+    const now = new Date().toISOString();
+    const created = await db.insertRequest({
       id,
       from_id: req.me.id,
       to_id: body.toStudentId,
@@ -358,23 +335,22 @@ export function createApp({ db, engine, config }) {
       type,
       message: body.message || null,
       priority,
-      now: new Date().toISOString(),
+      status: "pending",
+      created_at: now,
+      updated_at: now,
     });
-    res.status(201).json(toRequest(requestWithNames.get(id)));
-  });
+    res.status(201).json(toRequest(created));
+  }));
 
-  api.patch("/requests/:id", auth, (req, res) => {
+  api.patch("/requests/:id", auth, wrap(async (req, res) => {
     const { status } = parse(respondSchema, req.body);
-    const update = db.transaction(() => {
-      const row = q.requestById.get(req.params.id);
-      if (!row) throw new HttpError(404, "not_found", "Request not found");
-      if (row.to_id !== req.me.id) throw new HttpError(403, "forbidden", "Only the recipient can respond to this request");
-      if (row.status !== "pending") throw new HttpError(409, "already_resolved", `Request is already ${row.status}`);
-      q.updateRequestStatus.run(status, new Date().toISOString(), row.id);
-    });
-    update();
-    res.json(toRequest(requestWithNames.get(req.params.id)));
-  });
+    // Atomic: the repository only updates when the caller is the recipient AND the request is pending.
+    const r = await db.resolveRequest(req.params.id, req.me.id, status);
+    if (r.result === "not_found") throw new HttpError(404, "not_found", "Request not found");
+    if (r.result === "forbidden") throw new HttpError(403, "forbidden", "Only the recipient can respond to this request");
+    if (r.result === "already_resolved") throw new HttpError(409, "already_resolved", `Request is already ${r.status}`);
+    res.json(toRequest(await db.findRequestDetails(req.params.id)));
+  }));
 
   app.use("/api", api);
 

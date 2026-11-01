@@ -1,0 +1,29 @@
+{
+  "name": "peernest-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PeerNest REST API: Express + SQLite, calling the C++17 engine worker over JSON lines.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:engine": "node scripts/build-engine.mjs",
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "node --test tests/",
+    "lint": "node --check src/index.js && node --check src/app.js && node --check src/db.js && node --check src/engine.js && node --check src/config.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

@@ -43,7 +43,10 @@ function NewRequirement() {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (skills.length === 0) return toast.error("Add at least one required skill.");
+    if (skills.length === 0) {
+      toast.error("Add at least one required skill.");
+      return;
+    }
     const f = new FormData(e.currentTarget);
     const body: CollaborationRequirement = {
       title: String(f.get("title")),

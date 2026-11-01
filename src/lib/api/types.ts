@@ -18,11 +18,11 @@ export interface Student {
   email: string;
   department: string;
   year: number;
-  bio?: string;
+  bio?: string | undefined;
   skills: Skill[];
   interests: CollaborationType[];
   availability: Availability;
-  hoursPerWeek?: number;
+  hoursPerWeek?: number | undefined;
 }
 
 export interface Recommendation {
@@ -33,22 +33,22 @@ export interface Recommendation {
 }
 
 export interface StudentSearchQuery {
-  q?: string;
-  skills?: string[];
-  department?: string;
-  year?: number;
-  availability?: Availability;
-  interest?: CollaborationType;
+  q?: string | undefined;
+  skills?: string[] | undefined;
+  department?: string | undefined;
+  year?: number | undefined;
+  availability?: Availability | undefined;
+  interest?: CollaborationType | undefined;
 }
 
 export interface CollaborationRequirement {
-  id?: string;
+  id?: string | undefined;
   title: string;
   type: CollaborationType;
   description: string;
   requiredSkills: string[];
   teamSize: number;
-  deadline?: string;
+  deadline?: string | undefined;
   priority: 1 | 2 | 3;
 }
 
@@ -60,7 +60,7 @@ export interface CollaborationRequest {
   to: Pick<Student, "id" | "name" | "department">;
   requirementTitle: string;
   type: CollaborationType;
-  message?: string;
+  message?: string | undefined;
   status: RequestStatus;
   /** Priority assigned by the C++ priority queue. */
   priority: number;

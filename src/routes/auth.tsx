@@ -13,8 +13,8 @@ import type { SkillLevel } from "@/lib/api/types";
 type Mode = "login" | "register";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>): { mode?: Mode } => ({
-    mode: s.mode === "register" ? "register" : undefined,
+  validateSearch: (s: Record<string, unknown>): { mode?: Mode | undefined } => ({
+    mode: s["mode"] === "register" ? "register" : undefined,
   }),
   head: () => ({
     meta: [

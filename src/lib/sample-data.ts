@@ -12,14 +12,14 @@ export const sampleStudents: Student[] = [
 ];
 
 export const sampleRecommendations: Recommendation[] = [
-  { student: sampleStudents[0], matchScore: 92, sharedSkills: ["C++", "SQL"] },
-  { student: sampleStudents[1], matchScore: 85, sharedSkills: ["TypeScript"] },
-  { student: sampleStudents[2], matchScore: 78, sharedSkills: ["Python"] },
+  { student: sampleStudents[0]!, matchScore: 92, sharedSkills: ["C++", "SQL"] },
+  { student: sampleStudents[1]!, matchScore: 85, sharedSkills: ["TypeScript"] },
+  { student: sampleStudents[2]!, matchScore: 78, sharedSkills: ["Python"] },
 ];
 
 export const sampleRequests: CollaborationRequest[] = [
-  { id: "r1", from: sampleStudents[1], to: sampleStudents[0], requirementTitle: "Smart India Hackathon team", type: "hackathon", message: "Need a backend dev for our SIH idea.", status: "pending", priority: 1, createdAt: "2026-10-28" },
-  { id: "r2", from: sampleStudents[3], to: sampleStudents[0], requirementTitle: "Mock interview partner", type: "placement", status: "pending", priority: 2, createdAt: "2026-10-27" },
-  { id: "r3", from: sampleStudents[2], to: sampleStudents[0], requirementTitle: "CV final-year project", type: "project", status: "accepted", priority: 2, createdAt: "2026-10-20" },
-  { id: "r4", from: sampleStudents[4], to: sampleStudents[0], requirementTitle: "IoT weekend build", type: "hackathon", status: "rejected", priority: 3, createdAt: "2026-10-15" },
+  { id: "r1", from: sampleStudents[1]!, to: sampleStudents[0]!, requirementTitle: "Smart India Hackathon team", type: "hackathon", message: "Need a backend dev for our SIH idea.", status: "pending", priority: 1, createdAt: "2026-10-28" },
+  { id: "r2", from: sampleStudents[3]!, to: sampleStudents[0]!, requirementTitle: "Mock interview partner", type: "placement", status: "pending", priority: 2, createdAt: "2026-10-27" },
+  { id: "r3", from: sampleStudents[2]!, to: sampleStudents[0]!, requirementTitle: "CV final-year project", type: "project", status: "accepted", priority: 2, createdAt: "2026-10-20" },
+  { id: "r4", from: sampleStudents[4]!, to: sampleStudents[0]!, requirementTitle: "IoT weekend build", type: "hackathon", status: "rejected", priority: 3, createdAt: "2026-10-15" },
 ];

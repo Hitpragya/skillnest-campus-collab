@@ -1,7 +1,7 @@
 // Thin HTTP client for the PeerNest Node.js API (which wraps the C++ engine).
 // Set VITE_PEERNEST_API_URL to the API base URL, e.g. http://localhost:4000/api
 
-export const API_BASE_URL: string | undefined = import.meta.env.VITE_PEERNEST_API_URL;
+export const API_BASE_URL: string | undefined = import.meta.env["VITE_PEERNEST_API_URL"];
 
 export const isApiConfigured = () => Boolean(API_BASE_URL);
 

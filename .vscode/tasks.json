@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] },
+    "env": { "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}" }
+  },
+  "tasks": [
+    {
+      "label": "Engine: configure",
+      "type": "shell",
+      "command": "cmake -S engine -B engine/build -G Ninja -DCMAKE_BUILD_TYPE=Debug",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Engine: build",
+      "type": "shell",
+      "command": "cmake --build engine/build",
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["Engine: configure"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Engine: test",
+      "type": "shell",
+      "command": "ctest --test-dir engine/build --output-on-failure",
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["Engine: build"],
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Engine: run demo",
+      "type": "shell",
+      "command": "& '${workspaceFolder}\\engine\\build\\peernest_demo.exe'",
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["Engine: build"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Server: install",
+      "type": "shell",
+      "command": "npm install",
+      "options": { "cwd": "${workspaceFolder}\\server" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Server: test",
+      "type": "shell",
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}\\server" },
+      "dependsOn": ["Server: install", "Engine: build"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Server: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}\\server" },
+      "dependsOn": ["Server: install", "Engine: build"],
+      "dependsOrder": "sequence",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

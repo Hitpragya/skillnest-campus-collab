@@ -30,9 +30,10 @@ Browser (React frontend)  --HTTPS + JWT-->  Express API (/api)  --SQL-->  SQLite
 | GET | /students | JWT | `q, skills (comma list), mode=any\|all, department, year, availability, interest` → C++ `searchStudents` |
 | GET | /students/me/recommendations | JWT | C++ `recommendStudents`, limit 10 |
 | GET | /students/:id | JWT | no email |
+| GET | /requirements | JWT | All posts newest first with `owner {id,name,department}` (no email). `?mine=true` returns only your own posts |
 | POST | /requirements | JWT | |
 | GET | /requests | JWT | `status?`, `box=incoming(default)\|outgoing`. Pending ordered by C++; accepted/rejected newest first. No status = pending, then accepted, then rejected |
-| POST | /requests | JWT | `{toStudentId, message?, requirementId?, priority?}`; requirement must be the sender's and supplies title/type/priority; default title "Collaboration request", priority 2, type "project" |
+| POST | /requests | JWT | `{toStudentId, message?, requirementId?, priority?}`; if `requirementId` is set, `toStudentId` must be that requirement's owner (the sender is usually another student); the request inherits the saved title/type/priority and a conflicting `priority` is rejected (400 `priority_conflict`); default title "Collaboration request", priority 2, type "project" |
 | PATCH | /requests/:id | JWT | `{status: accepted\|rejected}`; recipient only (403), pending only (409) |
 
 Errors: `{ "error": { "code": "...", "message": "..." } }`.
@@ -41,7 +42,7 @@ Frontend: set `VITE_PEERNEST_API_URL=http://localhost:4000/api` (note the `/api`
 ## Decisions
 
 - Direct requests without a requirement get type `project` (the DB requires a type).
-- Students registered through the current form get `availability = available` and no interests.
+- Registration accepts optional collaboration interests and an availability value; if omitted, availability defaults to `available` and interests to an empty list.
 - Request IDs are UUIDs; the SQLite `sequence` (autoincrement) is the arrival order sent to C++.
 - JWT (HS256) expires after 7 days. `JWT_SECRET` is mandatory (≥ 32 chars) when `NODE_ENV=production`;
   locally a clearly named development-only secret is used with a warning.
@@ -84,5 +85,5 @@ shell or set `PEERNEST_ENGINE_PATH` to the built `.exe` with `C:\msys64\ucrt64\b
 ## Limits
 
 - No rate limiting or password reset yet.
-- No `GET /requirements/mine`; the frontend profile page still sends direct requests (priority 2).
+- Direct requests from a student profile use the priority chosen in the form (default 2).
 - Snapshot-per-call costs O(n) per request; fine for small datasets only.

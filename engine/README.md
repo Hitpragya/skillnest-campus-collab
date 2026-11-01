@@ -2,9 +2,8 @@
 
 C++17 library + JSON-lines worker used by the Node.js API in `/server`. The core library has no third-party dependencies; the worker uses the vendored single header nlohmann/json v3.11.3 (`third_party/nlohmann`, MIT), so builds need no network.
 
-> **Frontend note:** the web app's Architecture page still describes a Trie and a Weighted Graph
-> (and "graph-based" recommendations). These are **not implemented** and not part of the approved
-> core. That page must be aligned with this engine in a later frontend pass.
+> **Frontend note:** the web app's Architecture page (`src/routes/architecture.tsx`) describes exactly
+> the structures implemented here; Trie and graph structures are not part of this engine.
 
 ## Build
 

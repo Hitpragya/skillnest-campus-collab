@@ -59,7 +59,7 @@ function Directory() {
             </button>
           ))}
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid items-end gap-3 sm:grid-cols-3">
           <label className="flex flex-col gap-1 text-xs text-muted-foreground">
             Match skills
             <select value={mode} onChange={(e) => setMode(e.target.value as "any" | "all")} className="h-10 rounded-md border bg-card px-3 text-sm text-foreground">

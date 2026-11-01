@@ -78,3 +78,19 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Run locally in VS Code on Windows (MSYS2 UCRT64)
+
+Prerequisites (already at `C:\msys64\ucrt64\bin`): GCC, CMake, Ninja, GDB; plus Node.js 20+ for Windows.
+The workspace `.vscode/settings.json` prepends that folder to the integrated terminal `PATH` (workspace only, not your global settings).
+
+1. Open the project folder in VS Code.
+2. **Terminal → Run Task → "Engine: test (ctest)"** — configures with Ninja, builds, and runs the C++ tests.
+3. **Run Task → "Engine: run demo"** — prints skill search, recommendations and urgent-vs-normal ordering.
+4. In a terminal: `cd server; npm install` (first time only), then **Run Task → "Server: test"** and **"Server: dev"**.
+   The API listens on `http://localhost:4000/api` (`/api/health` should say `engine: ok`).
+5. Copy `.env.frontend.example` to `.env.local` in the project root, then run `npm install` and `npm run dev` for the frontend.
+   `VITE_PEERNEST_API_URL` must end in `/api`.
+
+Without `VITE_PEERNEST_API_URL`, the web app shows a clearly labelled sample preview and saves nothing.
+The published Lovable site has no backend until you deploy the API and set that variable.

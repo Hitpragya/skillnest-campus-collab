@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ function AuthPage() {
   const mode: Mode = search.mode ?? "login";
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const queryClient = useQueryClient();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -61,6 +63,7 @@ function AuthPage() {
               availability: (String(f.get("availability") || "available")) as Availability,
             });
       setToken(session.token);
+      queryClient.clear(); // drop any cached signed-out (401) results
       toast.success(mode === "login" ? "Welcome back!" : "Account created");
       navigate({ to: "/dashboard" });
     } catch (err) {

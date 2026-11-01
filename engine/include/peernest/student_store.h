@@ -25,6 +25,17 @@ enum class SearchMode {
     Any   // student must have at least one requested skill (union)
 };
 
+// Optional filters for searchStudents. Empty string / 0 / empty vector = "no filter".
+struct StudentFilters {
+    std::string q;                    // case-insensitive substring of name OR any skill
+    std::vector<std::string> skills;  // resolved through skillIndex_
+    SearchMode mode = SearchMode::Any;
+    std::string department;           // case-insensitive exact match
+    int year = 0;                     // exact match when > 0
+    std::string availability;         // case-insensitive exact match
+    std::string interest;             // student must list this interest
+};
+
 struct Recommendation {
     Student student;
     int score = 0;
@@ -52,6 +63,12 @@ public:
     // Results sorted by name, then id. Empty skill list -> empty result.
     std::vector<Student> searchBySkills(const std::vector<std::string>& skills,
                                         SearchMode mode) const;
+
+    // Combined directory search. If skills are given, candidates come from
+    // skillIndex_ (same rules as searchBySkills); otherwise every student in the
+    // vector is a candidate. Metadata filters are then checked by a linear scan
+    // over the candidates. Results sorted by name, then id.
+    std::vector<Student> searchStudents(const StudentFilters& filters) const;
 
     // Candidates are found through skillIndex_ (only students sharing >= 1 skill).
     // Sorted by score desc, then name asc, then id asc. Unknown id -> empty.

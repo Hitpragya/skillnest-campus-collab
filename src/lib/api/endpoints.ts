@@ -4,6 +4,7 @@ import type {
   AuthSession,
   CollaborationRequest,
   CollaborationRequirement,
+  HealthStatus,
   Recommendation,
   RegistrationPayload,
   RequestStatus,
@@ -14,6 +15,11 @@ import type {
 
 // Each function maps 1:1 to a route of the Node.js API in /server (mounted at /api,
 // so VITE_PEERNEST_API_URL must end with /api).
+export const healthApi = {
+  /** API + C++ worker status. The API answers 503 when the engine is down. */
+  check: () => apiRequest<HealthStatus>("/health"),
+};
+
 export const authApi = {
   login: (body: AuthCredentials) =>
     apiRequest<AuthSession>("/auth/login", { method: "POST", body: JSON.stringify(body) }),

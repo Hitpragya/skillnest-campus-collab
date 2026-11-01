@@ -22,6 +22,8 @@ export class ApiError extends Error {
   }
 }
 
+export const isUnauthorized = (e: unknown) => e instanceof ApiError && e.status === 401;
+
 const TOKEN_KEY = "peernest.token";
 export const getToken = () =>
   typeof window === "undefined" ? null : window.localStorage.getItem(TOKEN_KEY);
@@ -54,7 +56,14 @@ export async function apiRequest<T>(
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new ApiError(res.status, text || res.statusText);
+    let message = text || res.statusText;
+    try {
+      const parsed = JSON.parse(text) as { error?: { message?: string } };
+      if (parsed.error?.message) message = parsed.error.message;
+    } catch {
+      // not JSON - keep raw text
+    }
+    throw new ApiError(res.status, message);
   }
   return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
 }

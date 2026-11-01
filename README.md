@@ -137,7 +137,7 @@ npm run dev
 
 ## Deployment status
 
-- The frontend has a Lovable public preview. Without a configured API URL it runs in sample-preview mode.
+- The frontend can be previewed, but without a configured API URL it runs in sample-preview mode.
 - The API is **not deployed yet**. A `Dockerfile` and `render.yaml` are prepared, but there is no live API URL.
 - SQLite needs a persistent disk and exactly one server instance.
 - Remaining steps: choose a host with persistent disk, set a strong `JWT_SECRET` and `CORS_ORIGIN`, deploy, then set `VITE_PEERNEST_API_URL` to `https://<api-host>/api` for the frontend.

@@ -26,13 +26,13 @@ export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?:
         <h1 className="text-3xl font-semibold md:text-4xl">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-muted-foreground">{description}</p>}
       </div>
-      {actions && <div className="flex gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
   );
 }
 
 export function Panel({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("rounded-2xl border bg-card p-6 shadow-soft", className)}>{children}</div>;
+  return <div className={cn("min-w-0 rounded-2xl border bg-card p-6 shadow-soft", className)}>{children}</div>;
 }
 
 export function BackendNotice({ what = "data" }: { what?: string }) {

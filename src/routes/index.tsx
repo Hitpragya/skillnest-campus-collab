@@ -63,7 +63,7 @@ function Landing() {
         </div>
 
         <div className="relative animate-rise [animation-delay:150ms]">
-          <div className="absolute -inset-6 -z-10 rounded-[2rem] grid-dots opacity-60" />
+          <div className="absolute inset-0 -z-10 rounded-[2rem] grid-dots opacity-60 md:-inset-6" />
           <div className="rounded-3xl border bg-card p-5 shadow-elevated">
             <div className="mb-4 flex items-center justify-between">
               <p className="font-display text-sm font-semibold">Top matches for “C++, React”</p>

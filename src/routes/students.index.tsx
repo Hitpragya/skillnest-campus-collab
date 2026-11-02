@@ -43,7 +43,7 @@ function Directory() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Directory" title="Find students by skill" description="Skills are looked up in the C++ hash-map skill index; name, availability and interest filters scan the student vector." />
+      <PageHeader eyebrow="Directory" title="Find students" emphasis="by skill" description="Skills are looked up in the C++ hash-map skill index; name, availability and interest filters scan the student vector." />
       {offline && <BackendNotice what="search results" />}
 
       <div className="mb-6 space-y-4 rounded-lg border bg-card p-4 shadow-soft">

@@ -54,7 +54,7 @@ function Requests() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Inbox" title="Collaboration requests" description="Pending requests are ordered by the C++ scheduler: High from the priority_queue first, then Medium and Low in FIFO order." />
+      <PageHeader eyebrow="Inbox" title="Collaboration" emphasis="requests" description="Pending requests are ordered by the C++ scheduler: High from the priority_queue first, then Medium and Low in FIFO order." />
       {offline && <BackendNotice what="request data" />}
 
       <div className="mb-6 inline-flex rounded-xl bg-muted p-1">

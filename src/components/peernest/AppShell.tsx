@@ -26,8 +26,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           key={to}
           to={to}
           onClick={onNavigate}
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          activeProps={{ className: "!bg-primary/15 !text-sidebar-accent-foreground shadow-[inset_2px_0_0_var(--color-sidebar-primary)]" }}
+          className="flex items-center gap-3 rounded-full px-3.5 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          activeProps={{ className: "!bg-sidebar-accent !text-primary font-semibold" }}
         >
           <Icon className="size-4" />
           {label}
@@ -49,7 +49,7 @@ function ApiStatus() {
   const state = useBackendHealth();
   const c = statusCopy[state];
   return (
-    <div className="rounded-md border border-sidebar-border bg-sidebar-accent p-3 text-xs text-sidebar-foreground/80" role="status" aria-live="polite">
+    <div className="rounded-2xl border border-sidebar-border bg-card p-3 text-xs text-sidebar-foreground/80" role="status" aria-live="polite">
       <div className="flex items-center gap-2 font-semibold text-sidebar-accent-foreground">
         <span className={cn("size-2 rounded-full", c.dot)} />
         {c.title}
@@ -75,14 +75,14 @@ function SessionAction({ onDone }: { onDone?: (() => void) | undefined }) {
 
   if (me.data) {
     return (
-      <button onClick={signOut} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+      <button onClick={signOut} className="flex w-full items-center gap-3 rounded-full px-3.5 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
         <LogOut className="size-4" /> Sign out
         <span className="ml-auto truncate text-xs text-sidebar-foreground/60">{me.data.name}</span>
       </button>
     );
   }
   return (
-    <Link to="/auth" onClick={onDone} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+    <Link to="/auth" onClick={onDone} className="flex items-center gap-3 rounded-full px-3.5 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
       <LogIn className="size-4" /> Sign in
     </Link>
   );
@@ -136,7 +136,7 @@ export function AppShell({ children, authRequired = true }: { children: ReactNod
       </header>
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-ink/70" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 left-0 flex w-72 flex-col justify-between bg-sidebar p-5 animate-in slide-in-from-left">
             <div className="space-y-8">
               <div className="flex items-center justify-between">
@@ -150,7 +150,7 @@ export function AppShell({ children, authRequired = true }: { children: ReactNod
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 md:px-10 md:py-12">
+      <main className="mx-auto w-full max-w-6xl flex-1 bg-hero px-4 py-8 md:px-10 md:py-12">
         {authRequired ? <AuthGate>{children}</AuthGate> : children}
       </main>
     </div>

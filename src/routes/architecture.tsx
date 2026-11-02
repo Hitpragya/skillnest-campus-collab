@@ -85,7 +85,7 @@ function Flow({ steps }: { steps: { label: string; note: string; dark?: boolean 
 function Architecture() {
   return (
     <AppShell authRequired={false}>
-      <PageHeader eyebrow="Architecture" title="Data structures behind PeerNest" description="Search, recommendations and request ordering run in a C++17 engine. The frontend only displays results — it does not reimplement any of them." />
+      <PageHeader eyebrow="Architecture" title="Data structures" emphasis="behind PeerNest" description="Search, recommendations and request ordering run in a C++17 engine. The frontend only displays results — it does not reimplement any of them." />
 
       <div className="mb-6 rounded-xl border border-dashed border-highlight/50 bg-highlight/5 p-4 text-sm">
         <span className="font-semibold">Implemented core:</span>{" "}

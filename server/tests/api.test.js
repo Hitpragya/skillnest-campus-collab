@@ -73,6 +73,23 @@ describe("PeerNest API", () => {
     assert.equal(me.body.email, "asha@college.edu");
   });
 
+  test("profile updates persist and are used by the matching engine", async () => {
+    const update = await request(app).patch("/api/auth/me").set(bearer(asha.token)).send({
+      name: "Asha Sharma", department: "CSE", year: 4,
+      skills: [{ name: "React", level: "intermediate" }, { name: "TypeScript", level: "advanced" }], interests: ["hackathon"],
+      availability: "limited", bio: "Full-stack student", hoursPerWeek: 8,
+    });
+    assert.equal(update.status, 200, JSON.stringify(update.body));
+    assert.equal(update.body.email, "asha@college.edu");
+    assert.deepEqual(update.body.skills, [{ name: "React", level: "intermediate" }, { name: "TypeScript", level: "advanced" }]);
+    const me = await request(app).get("/api/auth/me").set(bearer(asha.token));
+    assert.equal(me.body.name, "Asha Sharma");
+    const results = await request(app).get("/api/students?skills=typescript").set(bearer(bala.token));
+    assert.deepEqual(results.body.map((s) => s.id), [asha.id]);
+    const bad = await request(app).patch("/api/auth/me").set(bearer(asha.token)).send({ name: "" });
+    assert.equal(bad.status, 400);
+  });
+
   test("protected routes require a valid token", async () => {
     assert.equal((await request(app).get("/api/auth/me")).status, 401);
     assert.equal((await request(app).get("/api/requirements")).status, 401);
@@ -211,6 +228,8 @@ describe("PeerNest API", () => {
     assert.equal(rejected.body.status, "rejected");
     const rejectedList = await request(app).get("/api/requests?status=rejected").set(bearer(asha.token));
     assert.deepEqual(rejectedList.body.map((r) => r.id), [stillPending[0].id]);
+    const outgoing = await request(app).get("/api/requests?box=outgoing").set(bearer(bala.token));
+    assert.ok(outgoing.body.some((r) => r.to.id === asha.id && r.from.id === bala.id));
   });
 
   test("data and ordering survive a restart", async () => {

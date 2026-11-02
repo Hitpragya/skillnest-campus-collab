@@ -32,6 +32,16 @@ const registerSchema = z.object({
   bio: z.string().trim().max(500).optional(),
   hoursPerWeek: z.coerce.number().int().min(0).max(80).optional(),
 });
+const profileSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  department: z.string().trim().min(1).max(80),
+  year: z.coerce.number().int().min(1).max(6),
+  skills: z.array(skillSchema).max(30),
+  interests: z.array(z.enum(COLLAB)).max(4),
+  availability: z.enum(AVAIL),
+  bio: z.string().trim().max(500).nullable().optional(),
+  hoursPerWeek: z.coerce.number().int().min(0).max(80).nullable().optional(),
+});
 const loginSchema = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(1).max(128) });
 const searchSchema = z.object({
   q: z.string().trim().max(80).optional(),
@@ -206,6 +216,20 @@ export function createApp({ db, engine, config }) {
   }));
 
   api.get("/auth/me", auth, (req, res) => res.json(toStudent(req.me, { includeEmail: true })));
+  api.patch("/auth/me", auth, wrap(async (req, res) => {
+    const body = parse(profileSchema, req.body);
+    const row = await db.updateStudentProfile(req.me.id, {
+      name: body.name,
+      department: body.department,
+      year: body.year,
+      bio: body.bio ?? null,
+      availability: body.availability,
+      hours_per_week: body.hoursPerWeek ?? null,
+      skills_json: JSON.stringify(body.skills),
+      interests_json: JSON.stringify(body.interests),
+    });
+    res.json(toStudent(row, { includeEmail: true }));
+  }));
 
   // ---- students (search and recommendations run in C++) ----
   api.get("/students", auth, wrap(async (req, res) => {

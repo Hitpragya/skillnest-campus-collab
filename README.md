@@ -11,12 +11,12 @@ The search, recommendation and request-ordering logic is written in C++17 using 
 ## Implemented features
 
 - Student registration and login (bcrypt-hashed passwords, JWT sessions, local sign-out)
-- Student profile: department, year, skills, interests, availability, hours per week
+- Student profile creation and editing: department, year, skills, interests, availability, bio and hours per week
 - Student directory with skill search ("Match skills": any or all selected skills) and metadata filters
 - Recommendations based on a deterministic scoring rule
 - Create a collaboration requirement (title, type, required skills, team size, deadline, priority)
 - Requirements Board: browse saved posts and send an "I'm interested" request to the owner
-- Send collaboration requests with a priority (High / Medium / Low); recipient can accept or reject
+- Incoming and outgoing collaboration-request views; recipients can accept or reject pending requests
 - Pending requests ordered by the C++ request scheduler
 - API / engine health indicator in the app sidebar
 

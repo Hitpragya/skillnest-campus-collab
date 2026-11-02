@@ -101,6 +101,18 @@ export interface RegistrationPayload extends AuthCredentials {
   hoursPerWeek?: number | undefined;
 }
 
+/** Editable fields for the signed-in student's persisted profile. */
+export interface ProfileUpdate {
+  name: string;
+  department: string;
+  year: number;
+  skills: Skill[];
+  interests: CollaborationType[];
+  availability: Availability;
+  bio?: string | null | undefined;
+  hoursPerWeek?: number | null | undefined;
+}
+
 export interface HealthStatus {
   api: "ok";
   engine: "ok" | "unavailable";

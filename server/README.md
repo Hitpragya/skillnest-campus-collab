@@ -27,6 +27,7 @@ Browser (React frontend)  --HTTPS + JWT-->  Express API (/api)  --SQL-->  SQLite
 | POST | /auth/register | no | bcrypt hash; returns `{token, student}` |
 | POST | /auth/login | no | |
 | GET | /auth/me | JWT | includes own email |
+| PATCH | /auth/me | JWT | Update the signed-in student's name, department, year, skills, interests, availability, bio and hours per week. Email and password changes are intentionally not included. |
 | GET | /students | JWT | `q, skills (comma list), mode=any\|all, department, year, availability, interest` → C++ `searchStudents` |
 | GET | /students/me/recommendations | JWT | C++ `recommendStudents`, limit 10 |
 | GET | /students/:id | JWT | no email |

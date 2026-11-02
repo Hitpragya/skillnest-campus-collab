@@ -36,7 +36,8 @@ const statusStyle: Record<RequestStatus, string> = {
 
 function Requests() {
   const [tab, setTab] = useState<RequestStatus>("pending");
-  const res = useRequests();
+  const [box, setBox] = useState<"incoming" | "outgoing">("incoming");
+  const res = useRequests(undefined, box);
   const qc = useQueryClient();
   const offline = isNotConfigured(res.error);
   const all = offline ? sampleRequests : (res.data ?? []);
@@ -54,10 +55,18 @@ function Requests() {
 
   return (
     <AppShell>
-      <PageHeader eyebrow="Inbox" title="Collaboration requests" description="Pending requests are ordered by the C++ scheduler: High from the priority_queue first, then Medium and Low in FIFO order." />
+      <PageHeader eyebrow={box === "incoming" ? "Inbox" : "Sent"} title="Collaboration requests" description={box === "incoming" ? "Pending requests are ordered by the C++ scheduler: High from the priority_queue first, then Medium and Low in FIFO order." : "Track the requests you sent and their current status."} />
       {offline && <BackendNotice what="request data" />}
 
-      <div className="mb-6 inline-flex rounded-xl bg-muted p-1">
+      <div className="mb-3 inline-flex rounded-xl bg-muted p-1" aria-label="Request direction">
+        {(["incoming", "outgoing"] as const).map((direction) => (
+          <button key={direction} onClick={() => setBox(direction)}
+            className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", box === direction ? "bg-card shadow-soft" : "text-muted-foreground")}>
+            {direction === "incoming" ? "Incoming" : "Outgoing"}
+          </button>
+        ))}
+      </div>
+      <div className="mb-6 inline-flex rounded-xl bg-muted p-1" aria-label="Request status">
         {tabs.map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={cn("rounded-lg px-4 py-2 text-sm font-medium capitalize transition-colors", tab === t ? "bg-card shadow-soft" : "text-muted-foreground")}>
@@ -74,10 +83,10 @@ function Requests() {
         <div className="space-y-3">
           {list.map((r) => (
             <div key={r.id} className="flex flex-col gap-4 rounded-lg border bg-card p-5 shadow-soft animate-rise sm:flex-row sm:items-center">
-              <Avatar name={r.from.name} />
+              <Avatar name={box === "incoming" ? r.from.name : r.to.name} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold">{r.from.name}</p>
+                  <p className="font-semibold">{box === "incoming" ? r.from.name : r.to.name}</p>
                   <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold capitalize", statusStyle[r.status])}>{r.status}</span>
                   <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs">P{r.priority} · {r.priority === 1 ? "High" : r.priority === 2 ? "Medium" : "Low"}</span>
                   {r.status === "pending" && r.queue && (
@@ -90,7 +99,7 @@ function Requests() {
                 <p className="text-sm text-foreground/80">{r.requirementTitle} · <span className="text-muted-foreground">{collabLabels[r.type]}</span></p>
                 {r.message && <p className="mt-1 text-sm text-muted-foreground">“{r.message}”</p>}
               </div>
-              {r.status === "pending" && (
+              {box === "incoming" && r.status === "pending" && (
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => respond(r.id, "rejected")}><X /> Reject</Button>
                   <Button size="sm" variant="hero" onClick={() => respond(r.id, "accepted")}><Check /> Accept</Button>

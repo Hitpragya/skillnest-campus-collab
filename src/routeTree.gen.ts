@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as CollaborationsNewRouteImport } from './routes/collaborations.new'
 import { Route as RequirementsIndexRouteImport } from './routes/requirements.index'
@@ -37,6 +38,11 @@ const AuthRoute = AuthRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestsRoute = RequestsRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/architecture': typeof ArchitectureRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
   '/collaborations/new': typeof CollaborationsNewRoute
   '/students/$id': typeof StudentsIdRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/architecture': typeof ArchitectureRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
   '/collaborations/new': typeof CollaborationsNewRoute
   '/students/$id': typeof StudentsIdRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/architecture': typeof ArchitectureRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
   '/collaborations/new': typeof CollaborationsNewRoute
   '/students/$id': typeof StudentsIdRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/auth'
     | '/dashboard'
+    | '/profile'
     | '/requests'
     | '/collaborations/new'
     | '/students/$id'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/auth'
     | '/dashboard'
+    | '/profile'
     | '/requests'
     | '/collaborations/new'
     | '/students/$id'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/auth'
     | '/dashboard'
+    | '/profile'
     | '/requests'
     | '/collaborations/new'
     | '/students/$id'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   ArchitectureRoute: typeof ArchitectureRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
+  ProfileRoute: typeof ProfileRoute
   RequestsRoute: typeof RequestsRoute
   CollaborationsNewRoute: typeof CollaborationsNewRoute
   StudentsIdRoute: typeof StudentsIdRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/requests': {
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitectureRoute: ArchitectureRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
+  ProfileRoute: ProfileRoute,
   RequestsRoute: RequestsRoute,
   CollaborationsNewRoute: CollaborationsNewRoute,
   StudentsIdRoute: StudentsIdRoute,

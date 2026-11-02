@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Inbox, PlusCircle, Sparkles } from "lucide-react";
+import { ArrowRight, Inbox, Pencil, PlusCircle, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/peernest/AppShell";
 import { AvailabilityPill, BackendNotice, EmptyState, PageHeader, Panel, SampleTag, SkillBadge, StudentCard } from "@/components/peernest/primitives";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ function Dashboard() {
         <Panel className="lg:col-span-1">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Your profile</p>
+            {me.data && <Button asChild size="sm" variant="ghost"><Link to="/profile"><Pencil /> Edit</Link></Button>}
             {offline && <SampleTag />}
           </div>
           {offline ? (

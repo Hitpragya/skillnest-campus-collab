@@ -8,7 +8,7 @@
 // skills/interests/required skills are stored as JSON text in both databases for identical mapping.
 //
 // Repository interface (all methods return Promises):
-//   findStudentById(id) / findStudentByEmail(email) / listStudents() / insertStudent(row)
+//   findStudentById(id) / findStudentByEmail(email) / listStudents() / insertStudent(row) / updateStudentProfile(id, row)
 //   findRequirementById(id) / insertRequirement(row) / listRequirements(ownerIdOrNull)
 //   insertRequest(row) -> request details row / findRequestById(id) / findRequestDetails(id)
 //   listRequests(userId, "incoming"|"outgoing", "pending"|"accepted"|"rejected")
@@ -152,6 +152,11 @@ export async function openSqlite(databasePath) {
     studentByEmail: db.prepare("SELECT * FROM students WHERE email = ?"),
     studentById: db.prepare("SELECT * FROM students WHERE id = ?"),
     allStudents: db.prepare("SELECT * FROM students ORDER BY created_at, id"),
+    updateStudentProfile: db.prepare(`UPDATE students SET
+      name = @name, department = @department, year = @year, bio = @bio,
+      availability = @availability, hours_per_week = @hours_per_week,
+      skills_json = @skills_json, interests_json = @interests_json
+      WHERE id = @id`),
     insertRequirement: db.prepare(`INSERT INTO requirements (${REQUIREMENT_COLS}) VALUES (${named(REQUIREMENT_COLS)})`),
     requirementById: db.prepare("SELECT * FROM requirements WHERE id = ?"),
     allRequirements: db.prepare(`${rqSelect} ORDER BY r.created_at DESC, r.rowid DESC`),
@@ -175,6 +180,10 @@ export async function openSqlite(databasePath) {
     findStudentByEmail: async (email) => s.studentByEmail.get(email),
     listStudents: async () => s.allStudents.all(),
     insertStudent: async (row) => void s.insertStudent.run(row),
+    updateStudentProfile: async (id, row) => {
+      s.updateStudentProfile.run({ ...row, id });
+      return s.studentById.get(id);
+    },
     findRequirementById: async (id) => s.requirementById.get(id),
     insertRequirement: async (row) => void s.insertRequirement.run(row),
     listRequirements: async (ownerId) => (ownerId ? s.ownRequirements.all(ownerId) : s.allRequirements.all()),
@@ -240,6 +249,13 @@ export async function openPostgres({ connectionString, pool: injected } = {}) {
     insertStudent: async (row) => {
       await pool.query(`INSERT INTO students (${STUDENT_COLS}) VALUES (${placeholders(STUDENT_COLS)})`, values(STUDENT_COLS, row));
     },
+    updateStudentProfile: async (id, row) => one(
+      `UPDATE students SET name = $1, department = $2, year = $3, bio = $4,
+       availability = $5, hours_per_week = $6, skills_json = $7, interests_json = $8
+       WHERE id = $9 RETURNING ${STUDENT_COLS}`,
+      [row.name, row.department, row.year, row.bio, row.availability, row.hours_per_week,
+        row.skills_json, row.interests_json, id],
+    ),
     findRequirementById: (id) => one(`SELECT ${REQUIREMENT_COLS} FROM requirements WHERE id = $1`, [id]),
     insertRequirement: async (row) => {
       await pool.query(`INSERT INTO requirements (${REQUIREMENT_COLS}) VALUES (${placeholders(REQUIREMENT_COLS)})`, values(REQUIREMENT_COLS, row));

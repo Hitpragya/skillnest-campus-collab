@@ -36,6 +36,18 @@ describe("PostgreSQL repository (pg-mem)", () => {
     assert.equal((await repo.listStudents()).length, 2);
   });
 
+  test("profile updates keep the email and password columns intact", async () => {
+    const original = await repo.findStudentById("a");
+    const updated = await repo.updateStudentProfile("a", {
+      name: "Asha", department: "CSE", year: 3, bio: "Updated", availability: "limited",
+      hours_per_week: 6, skills_json: '["typescript"]', interests_json: '["project"]',
+    });
+    assert.equal(updated.email, original.email);
+    assert.equal(updated.password_hash, original.password_hash);
+    assert.equal(updated.skills_json, '["typescript"]');
+    assert.equal(updated.hours_per_week, 6);
+  });
+
   test("duplicate email (different case) is rejected", async () => {
     await assert.rejects(repo.insertStudent(student("c", "B@example.com")));
   });
@@ -51,7 +63,7 @@ describe("PostgreSQL repository (pg-mem)", () => {
       required_skills_json: "[]", team_size: 3, deadline: null, priority: 1, created_at: now(),
     });
     const [r] = await repo.listRequirements(null);
-    assert.equal(r.owner_name, "A");
+    assert.equal(r.owner_name, "Asha");
     assert.equal(r.email, undefined);
     assert.equal((await repo.listRequirements("b")).length, 0);
     assert.equal((await repo.findRequirementById("rq1")).priority, 1);
@@ -60,7 +72,7 @@ describe("PostgreSQL repository (pg-mem)", () => {
   test("pending requests come back in arrival order", async () => {
     for (const [id, p] of [["r1", 3], ["r2", 1], ["r3", 2]]) {
       const d = await repo.insertRequest(reqRow(id, "a", "b", p));
-      assert.equal(d.from_name, "A");
+      assert.equal(d.from_name, "Asha");
     }
     const ids = (await repo.listRequests("b", "incoming", "pending")).map((r) => r.id);
     assert.deepEqual(ids, ["r1", "r2", "r3"]);

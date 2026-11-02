@@ -7,6 +7,7 @@ import type {
   HealthStatus,
   Recommendation,
   RegistrationPayload,
+  ProfileUpdate,
   RequirementPost,
   RequestStatus,
   SendRequestPayload,
@@ -27,6 +28,7 @@ export const authApi = {
   register: (body: RegistrationPayload) =>
     apiRequest<AuthSession>("/auth/register", { method: "POST", body: JSON.stringify(body) }),
   me: () => apiRequest<Student>("/auth/me"),
+  updateProfile: (body: ProfileUpdate) => apiRequest<Student>("/auth/me", { method: "PATCH", body: JSON.stringify(body) }),
 };
 
 export const studentsApi = {
@@ -49,8 +51,8 @@ export const collaborationsApi = {
       body: JSON.stringify(body),
     }),
   /** Pending requests ordered by the C++ scheduler: priority_queue (urgent) first, then FIFO queue. */
-  listRequests: (status?: RequestStatus) =>
-    apiRequest<CollaborationRequest[]>("/requests", { query: { status } }),
+  listRequests: (status?: RequestStatus, box: "incoming" | "outgoing" = "incoming") =>
+    apiRequest<CollaborationRequest[]>("/requests", { query: { status, box } }),
   sendRequest: (toStudentId: string, message: string, extra: Omit<SendRequestPayload, "toStudentId" | "message"> = {}) =>
     apiRequest<CollaborationRequest>("/requests", {
       method: "POST",

@@ -17,8 +17,8 @@ export const useStudent = (id: string) =>
 export const useRecommendations = () =>
   useQuery({ queryKey: ["recommendations"], queryFn: studentsApi.recommendations, retry });
 
-export const useRequests = (status?: RequestStatus) =>
-  useQuery({ queryKey: ["requests", status], queryFn: () => collaborationsApi.listRequests(status), retry });
+export const useRequests = (status?: RequestStatus, box: "incoming" | "outgoing" = "incoming") =>
+  useQuery({ queryKey: ["requests", box, status], queryFn: () => collaborationsApi.listRequests(status, box), retry });
 
 export const useCurrentStudent = () =>
   useQuery({ queryKey: ["me"], queryFn: authApi.me, retry, staleTime: 60_000 });

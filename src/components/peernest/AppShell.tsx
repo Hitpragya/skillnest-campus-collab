@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, Cpu, Inbox, LayoutDashboard, LogIn, LogOut, Menu, PlusCircle, Users, X } from "lucide-react";
+import { ClipboardList, Cpu, Inbox, LayoutDashboard, LogIn, LogOut, Menu, Pencil, PlusCircle, Users, X } from "lucide-react";
 import { Logo, Panel } from "./primitives";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/profile", label: "My profile", icon: Pencil },
   { to: "/students", label: "Directory", icon: Users },
   { to: "/requirements", label: "Requirements Board", icon: ClipboardList },
   { to: "/collaborations/new", label: "New requirement", icon: PlusCircle },

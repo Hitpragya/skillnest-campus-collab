@@ -75,10 +75,10 @@ function AuthPage() {
 
   return (
     <div className="grid min-h-screen md:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-ink p-10 text-ink-foreground md:flex">
+      <div className="hidden flex-col justify-between border-r bg-secondary p-10 text-foreground md:flex">
         <Logo className="text-ink-foreground" />
         <div>
-          <h2 className="text-3xl font-semibold leading-tight">Your skills are the index.<br /><em className="font-serif font-normal italic text-primary-glow">Your team is the result.</em></h2>
+          <h2 className="text-3xl font-semibold leading-tight">Your skills are the index.<br /><em className="font-serif font-normal italic text-primary">Your team is the result.</em></h2>
           <p className="mt-4 max-w-sm text-ink-foreground/70">Add your skills once — PeerNest's C++ engine indexes them so the right collaborators can find you.</p>
         </div>
         <p className="text-xs text-ink-foreground/50">Student Skill and Collaboration Management System</p>

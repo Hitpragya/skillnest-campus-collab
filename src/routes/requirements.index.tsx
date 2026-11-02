@@ -37,7 +37,7 @@ function BoardContent() {
   const me = useCurrentStudent();
   return (
     <>
-      <PageHeader eyebrow="Collaborate" title="Requirements Board" description="Find your next project, team or study partner."
+      <PageHeader eyebrow="Collaborate" title="Requirements" emphasis="Board" description="Find your next project, team or study partner."
         actions={<Button asChild variant="hero"><Link to="/collaborations/new"><PlusCircle /> New requirement</Link></Button>} />
       <div className="mb-6 inline-flex gap-1 rounded-xl bg-muted p-1" aria-label="Filter requirements">
         <Button asChild variant={mine ? "ghost" : "secondary"} size="sm"><Link to="/requirements" search={{}}>All posts</Link></Button>

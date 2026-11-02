@@ -34,7 +34,12 @@ function ProfileEditor() {
     if (duplicate) return toast.error("Each skill should appear only once.");
     const body: ProfileUpdate = {
       name: String(form.get("name")), department: String(form.get("department")), year: Number(form.get("year")),
-      skills: names.map((name) => ({ name, level: "intermediate" })),
+      skills: names.map((name) => ({
+        name,
+        // Keep the saved proficiency when a skill is still present. A newly
+        // typed skill has no saved entry, so it starts at the sensible default.
+        level: student.skills.find((skill) => skill.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase())?.level ?? "intermediate",
+      })),
       interests: form.getAll("interests") as CollaborationType[],
       availability: String(form.get("availability")) as Availability,
       bio: String(form.get("bio") || "") || null,

@@ -32,7 +32,7 @@ const example = [
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-hero">
       <header className="border-b">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-4">
           <Logo />
@@ -45,10 +45,10 @@ function Landing() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-5xl gap-10 px-5 py-12 md:grid-cols-[1.1fr_0.9fr] md:py-16">
+      <section className="mx-auto grid max-w-5xl gap-10 px-5 py-14 md:grid-cols-[1.1fr_0.9fr] md:py-24">
         <div>
-          <p className="flex items-center gap-2 text-sm text-muted-foreground"><Cpu className="size-4 text-primary-glow" /> Student Skill & Collaboration Management · DSA in C++</p>
-          <h1 className="mt-4 text-3xl font-semibold leading-tight md:text-4xl">Find students to work with on projects, hackathons and study groups.</h1>
+          <p className="flex items-center gap-2 text-sm text-muted-foreground"><Cpu className="size-4 text-primary" /> Student Skill & Collaboration Management · DSA in C++</p>
+          <h1 className="mt-5 text-4xl font-semibold leading-[1.02] md:text-6xl">Find students to work with on projects, hackathons and <em className="font-serif font-normal italic text-primary">study groups.</em></h1>
           <p className="mt-4 max-w-xl text-muted-foreground">
             Create a profile with your skills and interests, search the student directory, post a requirement for your team, and send or answer collaboration requests.
           </p>
@@ -59,10 +59,10 @@ function Landing() {
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-5">
+        <div className="rounded-3xl border bg-card p-6 shadow-elevated">
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="text-sm font-semibold">Matches for “C++, React”</p>
-            <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Example only</span>
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">Example only</span>
           </div>
           {example.map((r) => (
             <div key={r.n} className="flex items-center gap-3 border-t py-3 first:border-t-0">

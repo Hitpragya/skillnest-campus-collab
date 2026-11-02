@@ -62,7 +62,7 @@ function ProfileEditor() {
         <Field label="Full name" name="name" defaultValue={student.name} />
         <Field label="Department" name="department" defaultValue={student.department} />
         <Field label="Year" name="year" type="number" min={1} max={6} defaultValue={student.year} />
-        <Field label="Hours per week" name="hoursPerWeek" type="number" min={0} max={80} defaultValue={student.hoursPerWeek} />
+        <Field label="Hours per week" name="hoursPerWeek" type="number" min={0} max={80} defaultValue={student.hoursPerWeek} required={false} />
         <div className="sm:col-span-2"><Field label="Skills (comma separated)" name="skills" value={skills} onChange={(event) => setSkills(event.target.value)} /></div>
         <div className="sm:col-span-2 space-y-1.5"><Label htmlFor="bio">Short bio</Label><Textarea id="bio" name="bio" maxLength={500} defaultValue={student.bio} placeholder="What do you like building?" /></div>
         <div className="space-y-1.5"><Label htmlFor="availability">Availability</Label><select id="availability" name="availability" defaultValue={student.availability} className="h-10 w-full rounded-md border bg-card px-3 text-sm"><option value="available">Available</option><option value="limited">Limited</option><option value="busy">Busy</option></select></div>
